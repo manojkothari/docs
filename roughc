@@ -1,0 +1,1181 @@
+using System;
+using System.Collections.Generic;
+using System.Text;
+using SAP.Middleware.Connector;
+using System.Web;
+using System.Collections;
+using System.Runtime.Serialization;
+using System.Xml;
+using System.Configuration;
+using JubilantService.SAP_Model;
+
+class RFCDetails
+{
+    decimal tot = 0;
+    decimal tax = 0;
+    Property prop = new Property();
+    List<Login> objLGLIST = new List<Login>();
+    List<ReleaseConfiguration> objFinalList = new List<ReleaseConfiguration>();
+    List<PurchaseOrg> PurchaseOrgArray = new List<PurchaseOrg>();
+    List<PurchaseGrp> PurchaseGrpArray = new List<PurchaseGrp>();
+    List<ReleaseGrp> ReleaseGrpArray = new List<ReleaseGrp>();
+    List<ReleaseCodes> ReleaseCodesArray = new List<ReleaseCodes>();
+    List<DocumentType> DocumentTypeArray = new List<DocumentType>();
+    List<PendingOrderHdr> PendingOrderHdrArray = new List<PendingOrderHdr>();
+    List<PendingOrderDet> PendingOrderDetArray = new List<PendingOrderDet>();
+    List<POApproveReject> POApproveRejectArray = new List<POApproveReject>();
+    List<Plant> PlantArray = new List<Plant>();
+    ConfigDetails config = new ConfigDetails();
+    List<PRHeaderOutput> PRHeaderArray = new List<PRHeaderOutput>();
+    List<PRDetails> PRDetialsArray = new List<PRDetails>();
+    List<PRApproveRejectStatus> PRApproveRejectArray = new List<PRApproveRejectStatus>();
+    public List<Login> LoginDetails(RfcDestination destination)
+    {
+        Login objlgprop = new Login();
+        try
+        {
+            // test_mobile Admin@123    TEST_USER1   Admin@123
+            prop.GetUrlValues = HttpContext.Current.Request.Url.AbsoluteUri;
+            LogWrite("Request : " + prop.GetUrlValues);
+            prop.SplitValueEncode = prop.GetUrlValues.Split('&');
+            prop.UserName = prop.SplitValueEncode[0].ToString().Split('=')[1].ToString();
+            prop.Password = prop.SplitValueEncode[1].ToString().Split('=')[1].ToString();
+            RfcRepository repo = destination.Repository;
+            // IRfcFunction customerBapi = repo.CreateFunction("SUSR_LOGIN_CHECK_RFC");
+            IRfcFunction customerBapi = repo.CreateFunction("ZMM_SUSR_LOGIN_CHECK_RFC");
+            customerBapi.SetValue("BNAME", prop.UserName);
+            customerBapi.SetValue("PASSWORD", prop.Password);
+            customerBapi.Invoke(destination);
+            prop.Status = customerBapi.GetString("I_STATUS");
+            // string str = customerBapi.GetString("USE_NEW_EXCEPTION");
+            if (prop.Status == "Login successful!")
+            {
+                objlgprop.Status = "User login successfully !!";
+                objLGLIST.Add(objlgprop);
+                LogWrite("RESPONSE : " + objlgprop.Status);
+            }
+            else
+            {
+                objlgprop.Error = prop.Status;
+                objLGLIST.Add(objlgprop);
+                LogWrite("RESPONSE : " + objlgprop.Error);
+            }
+        }
+        catch (RfcCommunicationException e)
+        {
+            objlgprop.Error = e.Message.ToString();
+            objLGLIST.Add(objlgprop);
+            LogWrite("RESPONSE : " + objlgprop.Error);
+        }
+        catch (RfcLogonException e)
+        {
+            // user could not logon...
+            objlgprop.Error = e.Message.ToString();
+            objLGLIST.Add(objlgprop);
+            LogWrite("RESPONSE : " + objlgprop.Error);
+        }
+        catch (RfcAbapRuntimeException e)
+        {
+            // serious problem on ABAP system side...
+            objlgprop.Error = e.Message.ToString();
+            objLGLIST.Add(objlgprop);
+            LogWrite("RESPONSE : " + objlgprop.Error);
+        }
+        catch (RfcAbapBaseException e)
+        {
+            objlgprop.Error = e.Message.ToString();
+            objLGLIST.Add(objlgprop);
+            LogWrite("RESPONSE : " + objlgprop.Error);
+        }
+        return objLGLIST;
+    }
+    public List<ReleaseConfiguration> ReleaseConfiguration(RfcDestination destination)
+    {
+        try
+        {
+            RfcRepository repo = destination.Repository;
+            IRfcFunction customerBapi = repo.CreateFunction("ZMM_PO_REL_CONFIG_DETAILS_RFC");
+            customerBapi.Invoke(destination);
+            IRfcTable ZTT_T16FG = customerBapi.GetTable("I_FRGGR");
+            for (int cuIndex = 0; cuIndex < ZTT_T16FG.RowCount; cuIndex++)
+            {
+                ReleaseConfiguration objFinal = new ReleaseConfiguration();
+                objFinal.ReleGrp = ZTT_T16FG[cuIndex].GetString("FRGGR");
+                objFinal.DesRelGrp = ZTT_T16FG[cuIndex].GetString("FRGGT");
+                objFinalList.Add(objFinal);
+            }
+            IRfcTable ZTT_T16FC = customerBapi.GetTable("I_FRGCO");
+            for (int cuIndex = 0; cuIndex < ZTT_T16FC.RowCount; cuIndex++)
+            {
+                ReleaseConfiguration objFinal = new ReleaseConfiguration();
+                objFinal.RelGrp = ZTT_T16FC[cuIndex].GetString("FRGGR");
+                objFinal.RelCode = ZTT_T16FC[cuIndex].GetString("FRGCO");
+                objFinal.DesRelCode = ZTT_T16FC[cuIndex].GetString("FRGCT");
+                objFinalList.Add(objFinal);
+            }
+            IRfcTable ZTT_T024E = customerBapi.GetTable("I_EKORG");
+            for (int cuIndex = 0; cuIndex < ZTT_T024E.RowCount; cuIndex++)
+            {
+                ReleaseConfiguration objFinal = new ReleaseConfiguration();
+                objFinal.PurOrg = ZTT_T024E[cuIndex].GetString("EKORG");
+                objFinal.DesPurOrg = ZTT_T024E[cuIndex].GetString("EKOTX");
+                objFinalList.Add(objFinal);
+            }
+            IRfcTable ZTT_T024 = customerBapi.GetTable("I_EKGRP");
+            for (int cuIndex = 0; cuIndex < ZTT_T024.RowCount; cuIndex++)
+            {
+                ReleaseConfiguration objFinal = new ReleaseConfiguration();
+                objFinal.PurgGrp = ZTT_T024[cuIndex].GetString("EKGRP");
+                objFinal.DesPurGrp = ZTT_T024[cuIndex].GetString("EKNAM");
+                objFinalList.Add(objFinal);
+            }
+            IRfcTable ZTT_T161 = customerBapi.GetTable("I_BSART");
+            for (int cuIndex = 0; cuIndex < ZTT_T161.RowCount; cuIndex++)
+            {
+                ReleaseConfiguration objFinal = new ReleaseConfiguration();
+                objFinal.PurDocType = ZTT_T161[cuIndex].GetString("BSART");
+                objFinal.DesPurDocType = ZTT_T161[cuIndex].GetString("BATXT");
+                objFinalList.Add(objFinal);
+            }
+        }
+        catch (RfcCommunicationException e)
+        {
+            LogWrite("Error : " + e.Message.ToString());
+        }
+        catch (RfcLogonException e)
+        {
+            LogWrite("Error : " + e.Message.ToString());
+            // user could not logon...
+        }
+        catch (RfcAbapRuntimeException e)
+        {
+            LogWrite("Error : " + e.Message.ToString());
+            // serious problem on ABAP system side...
+        }
+        catch (RfcAbapBaseException e)
+        {
+            LogWrite("Error : " + e.Message.ToString());
+            // The function module returned an ABAP exception, an ABAP message
+            // or an ABAP class-based exception...
+        }
+        return objFinalList;
+    }
+    public List<ReleaseGrp> ReleaseGroup(RfcDestination destination)
+    {
+        try
+        {
+            prop.GetUrlValues = HttpContext.Current.Request.Url.AbsoluteUri;
+            LogWrite("Request : " + prop.GetUrlValues);
+            RfcRepository repo = destination.Repository;
+            IRfcFunction customerBapi = repo.CreateFunction("ZMM_PO_REL_CONFIG_DETAILS_RFC");
+            customerBapi.Invoke(destination);
+            IRfcTable ZTT_T16FG = customerBapi.GetTable("I_FRGGR");
+            for (int cuIndex = 0; cuIndex < ZTT_T16FG.RowCount; cuIndex++)
+            {
+                ReleaseGrp objFinal = new ReleaseGrp();
+                objFinal.RelGrp = ZTT_T16FG[cuIndex].GetString("FRGGR");
+                objFinal.DesRelGrp = ZTT_T16FG[cuIndex].GetString("FRGGT");
+                ReleaseGrpArray.Add(objFinal);
+                prop.Message = prop.Message + " Record:" + cuIndex + "=" + (objFinal.RelGrp + "," + objFinal.DesRelGrp);
+            }
+            LogWrite("RESPONSE : " + prop.Message);
+        }
+        catch (RfcCommunicationException e)
+        {
+            LogWrite("Error : " + e.Message.ToString());
+        }
+        catch (RfcLogonException e)
+        {
+            LogWrite("Error : " + e.Message.ToString());
+            // user could not logon...
+        }
+        catch (RfcAbapRuntimeException e)
+        {
+            LogWrite("Error : " + e.Message.ToString());
+            // serious problem on ABAP system side...
+        }
+        catch (RfcAbapBaseException e)
+        {
+            LogWrite("Error : " + e.Message.ToString());
+            // The function module returned an ABAP exception, an ABAP message
+            // or an ABAP class-based exception...
+        }
+        return ReleaseGrpArray;
+    }
+    public List<ReleaseCodes> GetReleaseCodes(RfcDestination destination, String ReleaseGrp)
+    {
+        try
+        {
+            prop.GetUrlValues = HttpContext.Current.Request.Url.AbsoluteUri;
+            LogWrite("Request : " + prop.GetUrlValues);
+            RfcRepository repo = destination.Repository;
+            IRfcFunction customerBapi = repo.CreateFunction("ZMM_PO_REL_CONFIG_DETAILS_RFC");
+            customerBapi.Invoke(destination);
+            IRfcTable ZTT_T16FC = customerBapi.GetTable("I_FRGCO");
+            for (int cuIndex = 0; cuIndex < ZTT_T16FC.RowCount; cuIndex++)
+            {
+                //ReleaseCodes objFinal = new ReleaseCodes();
+                prop.RelGrp = ZTT_T16FC[cuIndex].GetString("FRGGR");
+                if (ReleaseGrp == prop.RelGrp)
+                {
+                    ReleaseCodes objFinal = new ReleaseCodes();
+                    objFinal.RelCode = ZTT_T16FC[cuIndex].GetString("FRGCO");
+                    objFinal.DesRelCode = ZTT_T16FC[cuIndex].GetString("FRGCT");
+                    ReleaseCodesArray.Add(objFinal);
+                    prop.Message = prop.Message + " Record:" + cuIndex + "=" + (objFinal.RelCode + "," + objFinal.DesRelCode);
+                }
+                LogWrite("RESPONSE : " + prop.Message);
+            }
+        }
+        catch (RfcCommunicationException e)
+        {
+            LogWrite("Error : " + e.Message.ToString());
+        }
+        catch (RfcLogonException e)
+        {
+            LogWrite("Error : " + e.Message.ToString());
+            // user could not logon...
+        }
+        catch (RfcAbapRuntimeException e)
+        {
+            LogWrite("Error : " + e.Message.ToString());
+            // serious problem on ABAP system side...
+        }
+        catch (RfcAbapBaseException e)
+        {
+            LogWrite("Error : " + e.Message.ToString());
+            // The function module returned an ABAP exception, an ABAP message
+            // or an ABAP class-based exception...
+        }
+        return ReleaseCodesArray;
+    }
+    public List<PurchaseOrg> GetPurchaseOrg(RfcDestination destination)
+    {
+        try
+        {
+            prop.GetUrlValues = HttpContext.Current.Request.Url.AbsoluteUri;
+            LogWrite("Request : " + prop.GetUrlValues);
+            RfcRepository repo = destination.Repository;
+            IRfcFunction customerBapi = repo.CreateFunction("ZMM_PO_REL_CONFIG_DETAILS_RFC");
+            customerBapi.Invoke(destination);
+            IRfcTable ZTT_T024E = customerBapi.GetTable("I_EKORG");
+            for (int cuIndex = 0; cuIndex < ZTT_T024E.RowCount; cuIndex++)
+            {
+                PurchaseOrg objFinal = new PurchaseOrg();
+                objFinal.PurOrg = ZTT_T024E[cuIndex].GetString("EKORG");
+                objFinal.DesPurOrg = ZTT_T024E[cuIndex].GetString("EKOTX");
+                PurchaseOrgArray.Add(objFinal);
+                prop.Message = prop.Message + " Record:" + cuIndex + "=" + (objFinal.PurOrg + "," + objFinal.DesPurOrg);
+            }
+            LogWrite("RESPONSE : " + prop.Message);
+        }
+        catch (RfcCommunicationException e)
+        {
+            LogWrite("Error : " + e.Message.ToString());
+        }
+        catch (RfcLogonException e)
+        {
+            LogWrite("Error : " + e.Message.ToString());
+            // user could not logon...
+        }
+        catch (RfcAbapRuntimeException e)
+        {
+            LogWrite("Error : " + e.Message.ToString());
+            // serious problem on ABAP system side...
+        }
+        catch (RfcAbapBaseException e)
+        {
+            LogWrite("Error : " + e.Message.ToString());
+            // The function module returned an ABAP exception, an ABAP message
+            // or an ABAP class-based exception...
+        }
+        return PurchaseOrgArray;
+    }
+    public List<PurchaseGrp> GetPurchaseGrp(RfcDestination destination)
+    {
+        try
+        {
+            prop.GetUrlValues = HttpContext.Current.Request.Url.AbsoluteUri;
+            LogWrite("Request : " + prop.GetUrlValues);
+            RfcRepository repo = destination.Repository;
+            IRfcFunction customerBapi = repo.CreateFunction("ZMM_PO_REL_CONFIG_DETAILS_RFC");
+            customerBapi.Invoke(destination);
+            IRfcTable ZTT_T024 = customerBapi.GetTable("I_EKGRP");
+            for (int cuIndex = 0; cuIndex < ZTT_T024.RowCount; cuIndex++)
+            {
+                PurchaseGrp objFinal = new PurchaseGrp();
+                objFinal.PurgGrp = ZTT_T024[cuIndex].GetString("EKGRP");
+                objFinal.DesPurGrp = ZTT_T024[cuIndex].GetString("EKNAM");
+                PurchaseGrpArray.Add(objFinal);
+                prop.Message = prop.Message + " Record:" + cuIndex + "=" + (objFinal.PurgGrp + "," + objFinal.DesPurGrp);
+            }
+            LogWrite("RESPONSE : " + prop.Message);
+        }
+        catch (RfcCommunicationException e)
+        {
+            LogWrite("Error : " + e.Message.ToString());
+        }
+        catch (RfcLogonException e)
+        {
+            LogWrite("Error : " + e.Message.ToString());
+            // user could not logon...
+        }
+        catch (RfcAbapRuntimeException e)
+        {
+            LogWrite("Error : " + e.Message.ToString());
+            // serious problem on ABAP system side...
+        }
+        catch (RfcAbapBaseException e)
+        {
+            LogWrite("Error : " + e.Message.ToString());
+            // The function module returned an ABAP exception, an ABAP message
+            // or an ABAP class-based exception...
+        }
+        return PurchaseGrpArray;
+    }
+    public List<DocumentType> GetDocumentType(RfcDestination destination)
+    {
+        try
+        {
+            prop.GetUrlValues = HttpContext.Current.Request.Url.AbsoluteUri;
+            LogWrite("Request : " + prop.GetUrlValues);
+            RfcRepository repo = destination.Repository;
+            IRfcFunction customerBapi = repo.CreateFunction("ZMM_PO_REL_CONFIG_DETAILS_RFC");
+            customerBapi.Invoke(destination);
+            IRfcTable ZTT_T161 = customerBapi.GetTable("I_BSART");
+            for (int cuIndex = 0; cuIndex < ZTT_T161.RowCount; cuIndex++)
+            {
+                DocumentType objFinal = new DocumentType();
+                objFinal.PurDocType = ZTT_T161[cuIndex].GetString("BSART");
+                objFinal.DesPurDocType = ZTT_T161[cuIndex].GetString("BATXT");
+                DocumentTypeArray.Add(objFinal);
+                prop.Message = prop.Message + " Record:" + cuIndex + "=" + (objFinal.PurDocType + "," + objFinal.DesPurDocType);
+            }
+            LogWrite("RESPONSE : " + prop.Message);
+        }
+        catch (RfcCommunicationException e)
+        {
+            LogWrite("Error : " + e.Message.ToString());
+        }
+        catch (RfcLogonException e)
+        {
+            LogWrite("Error : " + e.Message.ToString());
+            // user could not logon...
+        }
+        catch (RfcAbapRuntimeException e)
+        {
+            LogWrite("Error : " + e.Message.ToString());
+            // serious problem on ABAP system side...
+        }
+        catch (RfcAbapBaseException e)
+        {
+            LogWrite("Error : " + e.Message.ToString());
+            // The function module returned an ABAP exception, an ABAP message
+            // or an ABAP class-based exception...
+        }
+        return DocumentTypeArray;
+    }
+    public List<PendingOrderHdr> POReleaseHeader(RfcDestination destination)
+    {
+        try
+        {
+            RfcRepository repo = destination.Repository;
+            prop.GetUrlValues = HttpContext.Current.Request.Url.AbsoluteUri;
+            LogWrite("Request : " + prop.GetUrlValues);
+            prop.SplitValueEncode = prop.GetUrlValues.Split('&');
+            prop.PurOrg = prop.SplitValueEncode[0].ToString().Split('=')[1].ToString();
+            prop.PurGrp = prop.SplitValueEncode[1].ToString().Split('=')[1].ToString();
+            prop.RelGrp = prop.SplitValueEncode[2].ToString().Split('=')[1].ToString();
+            prop.RelCode = prop.SplitValueEncode[3].ToString().Split('=')[1].ToString();
+            prop.DocType = prop.SplitValueEncode[4].ToString().Split('=')[1].ToString();
+            prop.UserName = prop.SplitValueEncode[5].ToString().Split('=')[1].ToString();
+            //prop.Password = prop.SplitValueEncode[6].ToString().Split('=')[1].ToString();  
+            IRfcFunction customerBapi = repo.CreateFunction("ZMM_LIST_PO_REL_HDR_RFC");
+            customerBapi.SetValue("I_EKORG", prop.PurOrg);
+            customerBapi.SetValue("I_EKGRP", prop.PurGrp);
+            customerBapi.SetValue("I_FRGGR", prop.RelGrp);
+            customerBapi.SetValue("I_FRGCO", prop.RelCode);
+            customerBapi.SetValue("I_BSART", prop.DocType);
+            customerBapi.SetValue("BNAME", prop.UserName);
+            //  customerBapi.SetValue("PASSWORD", prop.Password);
+            customerBapi.Invoke(destination);
+            prop.Status = customerBapi.GetString("I_STATUS");
+            IRfcTable ZTT_PO_REL_HDR = customerBapi.GetTable("I_PO_REL_HDR");
+            // if (prop.Status == "No record found!!" || prop.Status == "Invalid login credential!" || prop.Status == "No authorization!!")
+            if (prop.Status != "")
+            {
+                PendingOrderHdr objPendingOrderHdr = new PendingOrderHdr();
+                objPendingOrderHdr.Error = prop.Status;
+                PendingOrderHdrArray.Add(objPendingOrderHdr);
+                LogWrite("RESPONSE : " + objPendingOrderHdr.Error);
+            }
+            else
+            {
+                for (int cuIndex = 0; cuIndex < ZTT_PO_REL_HDR.RowCount; cuIndex++)
+                {
+                    PendingOrderHdr objPendingOrderHdr = new PendingOrderHdr();
+                    objPendingOrderHdr.DocNo = ZTT_PO_REL_HDR[cuIndex].GetString("EBELN");
+                    objPendingOrderHdr.CompanyCode = ZTT_PO_REL_HDR[cuIndex].GetString("BUKRS");
+                    objPendingOrderHdr.DocType = ZTT_PO_REL_HDR[cuIndex].GetString("BSART");
+                    objPendingOrderHdr.VenderAccNo = ZTT_PO_REL_HDR[cuIndex].GetString("LIFNR");
+                    objPendingOrderHdr.VenderName = ZTT_PO_REL_HDR[cuIndex].GetString("NAME1");
+                    objPendingOrderHdr.TermPaymentKey = ZTT_PO_REL_HDR[cuIndex].GetString("ZTERM");
+                    objPendingOrderHdr.PurOrg = ZTT_PO_REL_HDR[cuIndex].GetString("EKORG");
+                    objPendingOrderHdr.PurGrp = ZTT_PO_REL_HDR[cuIndex].GetString("EKGRP");
+                    objPendingOrderHdr.CurrencyKey = ZTT_PO_REL_HDR[cuIndex].GetString("WAERS");
+                    objPendingOrderHdr.ExchangeRate = ZTT_PO_REL_HDR[cuIndex].GetString("WKURS");
+                    objPendingOrderHdr.IncotermsP1 = ZTT_PO_REL_HDR[cuIndex].GetString("INCO1");
+                    objPendingOrderHdr.IncotermsP2 = ZTT_PO_REL_HDR[cuIndex].GetString("INCO2");
+                    // objPendingOrderHdr.Date = ZTT_PO_REL_HDR[cuIndex].GetString("BEDAT");
+                    objPendingOrderHdr.Date = ZTT_PO_REL_HDR[cuIndex].GetString("BEDAT").Substring(6, 2) + "-" + ZTT_PO_REL_HDR[cuIndex].GetString("BEDAT").Substring(4, 2) + "-" + ZTT_PO_REL_HDR[cuIndex].GetString("BEDAT").Substring(0, 4);
+                    objPendingOrderHdr.Amount = ZTT_PO_REL_HDR[cuIndex].GetString("KWERT");
+                    objPendingOrderHdr.RelGrp = ZTT_PO_REL_HDR[cuIndex].GetString("FRGGR");
+                    objPendingOrderHdr.RelCode = ZTT_PO_REL_HDR[cuIndex].GetString("FRGCO");
+                    objPendingOrderHdr.CRCode = ZTT_PO_REL_HDR[cuIndex].GetString("REL_CODE");
+                    objPendingOrderHdr.CR_CD_TXT = ZTT_PO_REL_HDR[cuIndex].GetString("REL_CD_TX");
+                    objPendingOrderHdr.TAX_Amount = ZTT_PO_REL_HDR[cuIndex].GetString("TAX_AMOUNT").Trim();
+                    objPendingOrderHdr.Del_Indicator = ZTT_PO_REL_HDR[cuIndex].GetString("LOEKZ");
+                    prop.Message = prop.Message + " Record:" + cuIndex + "=" + (objPendingOrderHdr.DocNo + "," + objPendingOrderHdr.CompanyCode + "," + objPendingOrderHdr.DocType + ","
+                        + objPendingOrderHdr.VenderAccNo + "," + objPendingOrderHdr.VenderName + "," + objPendingOrderHdr.TermPaymentKey + ","
+                        + objPendingOrderHdr.PurOrg + "," + objPendingOrderHdr.PurGrp + "," + objPendingOrderHdr.CurrencyKey + ","
+                        + objPendingOrderHdr.ExchangeRate + "," + objPendingOrderHdr.IncotermsP1 + "," + objPendingOrderHdr.IncotermsP2 + ","
+                        + objPendingOrderHdr.Date + "," + objPendingOrderHdr.Amount + "," + objPendingOrderHdr.RelGrp + "," + objPendingOrderHdr.RelCode);
+                    PendingOrderHdrArray.Add(objPendingOrderHdr);
+                }
+                LogWrite("RESPONSE : " + prop.Message);
+            }
+        }
+        catch (RfcCommunicationException e)
+        {
+            LogWrite("Error : " + prop.Message);
+        }
+        catch (RfcLogonException e)
+        {
+            LogWrite("Error : " + e.Message.ToString());
+            // user could not logon...
+        }
+        catch (RfcAbapRuntimeException e)
+        {
+            LogWrite("Error : " + e.Message.ToString());
+            // serious problem on ABAP system side...
+        }
+        catch (RfcAbapBaseException e)
+        {
+            LogWrite("Error : " + e.Message.ToString());
+            // The function module returned an ABAP exception, an ABAP message
+            // or an ABAP class-based exception...
+        }
+        return PendingOrderHdrArray;
+    }
+    public List<PendingOrderDet> POReleaseItemDet(RfcDestination destination)
+    {
+        try
+        {
+            string ItemCat;
+            RfcRepository repo = destination.Repository;
+            prop.GetUrlValues = HttpContext.Current.Request.Url.AbsoluteUri;
+            LogWrite("Request : " + prop.GetUrlValues);
+            prop.SplitValueEncode = prop.GetUrlValues.Split('&');
+            prop.DocNo = prop.SplitValueEncode[0].ToString().Split('=')[1].ToString();
+            prop.PurOrg = prop.SplitValueEncode[1].ToString().Split('=')[1].ToString();
+            prop.PurGrp = prop.SplitValueEncode[2].ToString().Split('=')[1].ToString();
+            prop.RelGrp = prop.SplitValueEncode[3].ToString().Split('=')[1].ToString();
+            prop.RelCode = prop.SplitValueEncode[4].ToString().Split('=')[1].ToString();
+            prop.DocType = prop.SplitValueEncode[5].ToString().Split('=')[1].ToString();
+            prop.UserName = prop.SplitValueEncode[6].ToString().Split('=')[1].ToString();
+            // prop.Password = prop.SplitValueEncode[7].ToString().Split('=')[1].ToString();
+            IRfcFunction customerBapi = repo.CreateFunction("ZMM_LIST_PO_REL_ITM_RFC");
+            customerBapi.SetValue("I_EBELN", prop.DocNo);
+            customerBapi.SetValue("I_EKORG", prop.PurOrg);
+            customerBapi.SetValue("I_EKGRP", prop.PurGrp);
+            customerBapi.SetValue("I_FRGGR", prop.RelGrp);
+            customerBapi.SetValue("I_FRGCO", prop.RelCode);
+            customerBapi.SetValue("I_BSART", prop.DocType);
+            customerBapi.SetValue("BNAME", prop.UserName);
+            //customerBapi.SetValue("PASSWORD", prop.Password);
+            customerBapi.Invoke(destination);
+            prop.Status = customerBapi.GetString("I_STATUS");
+            IRfcTable ZTT_PO_REL_ITM = customerBapi.GetTable("I_PO_REL_ITM");
+            // PendingOrderDet objPendingOrderDet = new PendingOrderDet();
+            // if (prop.Status == "No record found!!" || prop.Status == "Invalid login credential!" || prop.Status == "No authorization!!")
+            if (prop.Status != "")
+            {
+                PendingOrderHdr objPendingOrderDet = new PendingOrderHdr();
+                objPendingOrderDet.Error = prop.Status;
+                //  PendingOrderDetArray.Add(objPendingOrderDet); 
+                LogWrite("RESPONSE : " + objPendingOrderDet.Error);
+            }
+            else
+            {
+                for (int cuIndex = 0; cuIndex < ZTT_PO_REL_ITM.RowCount; cuIndex++)
+                {
+                    PendingOrderDet objPendingOrderDet = new PendingOrderDet();
+                    objPendingOrderDet.DocNo = ZTT_PO_REL_ITM[cuIndex].GetString("EBELN");
+                    objPendingOrderDet.ItemNo = ZTT_PO_REL_ITM[cuIndex].GetString("EBELP");
+                    objPendingOrderDet.MaterialNo = ZTT_PO_REL_ITM[cuIndex].GetString("MATNR");
+                    objPendingOrderDet.MaterialNoDes = ZTT_PO_REL_ITM[cuIndex].GetString("MAKTX");
+                    // objPendingOrderDet.ItemCat = ZTT_PO_REL_ITM[cuIndex].GetString("PSTYP");                        
+                    objPendingOrderDet.ItemCat = ZTT_PO_REL_ITM[cuIndex].GetString("PTEXT");
+                    objPendingOrderDet.AccAssCat = ZTT_PO_REL_ITM[cuIndex].GetString("KNTTP");
+                    //objPendingOrderDet.AccAssCat = ZTT_PO_REL_ITM[cuIndex].GetString("KNTTX");
+                    objPendingOrderDet.MaterialGrp = ZTT_PO_REL_ITM[cuIndex].GetString("MATKL");
+                    objPendingOrderDet.Price = ZTT_PO_REL_ITM[cuIndex].GetString("KBETR");
+                    objPendingOrderDet.PriceUnit = ZTT_PO_REL_ITM[cuIndex].GetString("EPEIN");
+                    objPendingOrderDet.Amount = ZTT_PO_REL_ITM[cuIndex].GetString("KWERT").Trim();
+                    objPendingOrderDet.UOM = ZTT_PO_REL_ITM[cuIndex].GetString("MEINS");
+                    objPendingOrderDet.POQuantity = ZTT_PO_REL_ITM[cuIndex].GetString("MENGE");
+                    objPendingOrderDet.CostCenter = ZTT_PO_REL_ITM[cuIndex].GetString("KOSTL");
+                    objPendingOrderDet.OldProjectNo = ZTT_PO_REL_ITM[cuIndex].GetString("PROJN");
+                    objPendingOrderDet.MainAssetNo = ZTT_PO_REL_ITM[cuIndex].GetString("ANLN1");
+                    objPendingOrderDet.OrderNo = ZTT_PO_REL_ITM[cuIndex].GetString("AUFNR");
+                    objPendingOrderDet.WBSElement = ZTT_PO_REL_ITM[cuIndex].GetString("PS_PSP_PNR");
+                    objPendingOrderDet.Del_Indicator = ZTT_PO_REL_ITM[cuIndex].GetString("LOEKZ");
+                    objPendingOrderDet.ItemDelivDate = ZTT_PO_REL_ITM[cuIndex].GetString("EINDT").Substring(6, 2) + "-" + ZTT_PO_REL_ITM[cuIndex].GetString("EINDT").Substring(4, 2) + "-" + ZTT_PO_REL_ITM[cuIndex].GetString("EINDT").Substring(0, 4);
+                    tot = tot + Convert.ToDecimal(objPendingOrderDet.Amount.Trim());
+                    objPendingOrderDet.Totamnt = tot;
+                    // objPendingOrderDet.Vat =Convert.ToDecimal(ConfigurationManager.AppSettings["VAT"].ToString()) ;                        
+                    prop.Message = prop.Message + " Record:" + cuIndex + "=" + (objPendingOrderDet.DocNo + "," + objPendingOrderDet.ItemNo + "," + objPendingOrderDet.MaterialNo + ","
+                        + objPendingOrderDet.MaterialNoDes + "," + objPendingOrderDet.ItemCat + "," + objPendingOrderDet.AccAssCat + "," + objPendingOrderDet.MaterialGrp
+                         + "," + objPendingOrderDet.Price + "," + objPendingOrderDet.PriceUnit + "," + objPendingOrderDet.Amount + "," + objPendingOrderDet.UOM
+                          + "," + objPendingOrderDet.POQuantity + "," + objPendingOrderDet.CostCenter + "," + objPendingOrderDet.OldProjectNo
+                          + "," + objPendingOrderDet.MainAssetNo + "," + objPendingOrderDet.OrderNo + "," + objPendingOrderDet.WBSElement + "," + objPendingOrderDet.ItemDelivDate);
+
+                    PendingOrderDetArray.Add(objPendingOrderDet);
+                }
+                LogWrite("RESPONSE : " + prop.Message);
+            }
+        }
+        catch (RfcCommunicationException e)
+        {
+            LogWrite("Error : " + e.ToString());
+        }
+        catch (RfcLogonException e)
+        {
+            // user could not logon...
+            LogWrite("Error : " + e.ToString());
+        }
+        catch (RfcAbapRuntimeException e)
+        {
+            // serious problem on ABAP system side...
+            LogWrite("Error : " + e.ToString());
+        }
+        catch (RfcAbapBaseException e)
+        {
+            // The function module returned an ABAP exception, an ABAP message
+            // or an ABAP class-based exception...
+            LogWrite("Error : " + e.ToString());
+        }
+        return PendingOrderDetArray;
+    }
+    public List<POApproveReject> POApproveRejectIndicator(RfcDestination destination)
+    {
+        POApproveReject objPoAR = new POApproveReject();
+
+        try
+        {
+
+            RfcRepository repo = destination.Repository;
+            prop.GetUrlValues = HttpContext.Current.Request.Url.AbsoluteUri;
+            LogWrite("Request : " + prop.GetUrlValues);
+            prop.SplitValueEncode = prop.GetUrlValues.Split('&');
+            prop.UserName = prop.SplitValueEncode[0].ToString().Split('=')[1].ToString();
+            prop.Password = prop.SplitValueEncode[1].ToString().Split('=')[1].ToString();
+            prop.DocNo = prop.SplitValueEncode[2].ToString().Split('=')[1].ToString();
+            prop.PurOrg = prop.SplitValueEncode[3].ToString().Split('=')[1].ToString();
+            prop.PurGrp = prop.SplitValueEncode[4].ToString().Split('=')[1].ToString();
+            prop.RelGrp = prop.SplitValueEncode[5].ToString().Split('=')[1].ToString();
+            prop.RelCode = prop.SplitValueEncode[6].ToString().Split('=')[1].ToString();
+            prop.DocType = prop.SplitValueEncode[7].ToString().Split('=')[1].ToString();
+            prop.Status = prop.SplitValueEncode[8].ToString().Split('=')[1].ToString();
+            IRfcFunction customerBapi = repo.CreateFunction("ZMM_APPROVE_REJECT_PO_RFC");
+            customerBapi.SetValue("BNAME", prop.UserName);
+            customerBapi.SetValue("PASSWORD", prop.Password);
+            customerBapi.SetValue("I_EBELN", prop.DocNo);
+            customerBapi.SetValue("I_EKORG", prop.PurOrg);
+            customerBapi.SetValue("I_EKGRP", prop.PurGrp);
+            customerBapi.SetValue("I_FRGGR", prop.RelGrp);
+            customerBapi.SetValue("I_FRGCO", prop.RelCode);
+            customerBapi.SetValue("I_BSART", prop.DocType);
+            customerBapi.SetValue("I_POSTAT", prop.Status);
+            customerBapi.Invoke(destination);
+
+            objPoAR.Status = customerBapi.GetString("I_STATUS");
+
+            LogWrite("RESPONSE : " + objPoAR.Status);
+        }
+        catch (RfcCommunicationException e)
+        {
+            LogWrite("Error : " + e.Message.ToString());
+            objPoAR.Status = e.Message.ToString();
+        }
+        catch (RfcLogonException e)
+        {
+            LogWrite("Error : " + e.Message.ToString());
+            objPoAR.Status = e.Message.ToString();
+            // user could not logon...
+        }
+        catch (RfcAbapRuntimeException e)
+        {
+            LogWrite("Error : " + e.Message.ToString());
+            objPoAR.Status = e.Message.ToString();
+            // serious problem on ABAP system side...
+        }
+        catch (RfcAbapBaseException e)
+        {
+            LogWrite("Error : " + e.Message.ToString());
+            objPoAR.Status = e.Message.ToString();
+            // The function module returned an ABAP exception, an ABAP message
+            // or an ABAP class-based exception...
+        }
+        POApproveRejectArray.Add(objPoAR);
+        return POApproveRejectArray;
+    }
+
+    public ConfigDetails GetConfigDetails(RfcDestination destination)
+    {
+        try
+        {
+            prop.GetUrlValues = HttpContext.Current.Request.Url.AbsoluteUri;
+            LogWrite("Request : " + prop.GetUrlValues);
+            RfcRepository repo = destination.Repository;
+            IRfcFunction customerBapi = repo.CreateFunction("ZMM_PR_REL_CONFIG_DETAILS_RFC");
+            customerBapi.Invoke(destination);
+            IRfcTable ZTT_T16FG = customerBapi.GetTable("I_WERKS");
+            IRfcTable ZTT_T17FG = customerBapi.GetTable("I_EKGRP");
+            IRfcTable ZTT_T18FG = customerBapi.GetTable("I_FRGGR");
+            IRfcTable ZTT_T19FG = customerBapi.GetTable("I_FRGCO");
+            IRfcTable ZTT_T20FG = customerBapi.GetTable("I_BSART");
+            for (int cuIndex = 0; cuIndex < ZTT_T16FG.RowCount; cuIndex++)
+            {
+                Plant objFinal = new Plant();
+                objFinal.plant = ZTT_T16FG[cuIndex].GetString("WERKS");
+                objFinal.name = ZTT_T16FG[cuIndex].GetString("NAME1");
+                PlantArray.Add(objFinal);
+                prop.Message = prop.Message + " Record:" + cuIndex + "=" + (objFinal.plant + "," + objFinal.name);
+            }
+            config.Plant = PlantArray;
+            for (int cuIndex = 0; cuIndex < ZTT_T17FG.RowCount; cuIndex++)
+            {
+                PurchaseGrp objFinal = new PurchaseGrp();
+                objFinal.PurgGrp = ZTT_T17FG[cuIndex].GetString("EKGRP");
+                objFinal.DesPurGrp = ZTT_T17FG[cuIndex].GetString("EKNAM");
+                PurchaseGrpArray.Add(objFinal);
+                prop.Message = prop.Message + " Record:" + cuIndex + "=" + (objFinal.PurgGrp + "," + objFinal.DesPurGrp);
+            }
+            config.PurGrp = PurchaseGrpArray;
+            for (int cuIndex = 0; cuIndex < ZTT_T18FG.RowCount; cuIndex++)
+            {
+                ReleaseGrp objFinal = new ReleaseGrp();
+                objFinal.RelGrp = ZTT_T18FG[cuIndex].GetString("FRGGR");
+                objFinal.DesRelGrp = ZTT_T18FG[cuIndex].GetString("FRGGT");
+                ReleaseGrpArray.Add(objFinal);
+                prop.Message = prop.Message + " Record:" + cuIndex + "=" + (objFinal.RelGrp + "," + objFinal.DesRelGrp);
+            }
+            config.RelGrp = ReleaseGrpArray;
+            for (int cuIndex = 0; cuIndex < ZTT_T19FG.RowCount; cuIndex++)
+            {
+                ReleaseCodes objFinal = new ReleaseCodes();
+                objFinal.RelCode = ZTT_T19FG[cuIndex].GetString("FRGGR");
+                objFinal.DesRelCode = ZTT_T19FG[cuIndex].GetString("FRGCO");
+                ReleaseCodesArray.Add(objFinal);
+                prop.Message = prop.Message + " Record:" + cuIndex + "=" + (objFinal.RelCode + "," + objFinal.DesRelCode);
+            }
+            config.RelCode = ReleaseCodesArray;
+            for (int cuIndex = 0; cuIndex < ZTT_T20FG.RowCount; cuIndex++)
+            {
+                DocumentType objFinal = new DocumentType();
+                objFinal.DesPurDocType = ZTT_T20FG[cuIndex].GetString("BSART");
+                objFinal.PurDocType = ZTT_T20FG[cuIndex].GetString("BATXT");
+                DocumentTypeArray.Add(objFinal);
+                prop.Message = prop.Message + " Record:" + cuIndex + "=" + (objFinal.DesPurDocType + "," + objFinal.PurDocType);
+            }
+            config.DocType = DocumentTypeArray;
+            LogWrite("RESPONSE : " + prop.Message);
+        }
+        catch (RfcCommunicationException e)
+        {
+            LogWrite("Error : " + e.Message.ToString());
+        }
+        catch (RfcLogonException e)
+        {
+            LogWrite("Error : " + e.Message.ToString());
+            // user could not logon...
+        }
+        catch (RfcAbapRuntimeException e)
+        {
+            LogWrite("Error : " + e.Message.ToString());
+            // serious problem on ABAP system side...
+        }
+        catch (RfcAbapBaseException e)
+        {
+            LogWrite("Error : " + e.Message.ToString());
+            // The function module returned an ABAP exception, an ABAP message
+            // or an ABAP class-based exception...
+        }
+        return config;
+    }
+
+    public List<PRHeaderOutput> GetPRHeader(RfcDestination destination, PRHeaderInput objReq)
+    {
+        try
+        {
+            RfcRepository repo = destination.Repository;
+            prop.GetUrlValues = HttpContext.Current.Request.Url.AbsoluteUri;
+            LogWrite("Request : " + prop.GetUrlValues);
+            //prop.SplitValueEncode = prop.GetUrlValues.Split('&');
+            prop.UserName = objReq.UserId;
+            prop.Plant = objReq.Plant;
+            prop.PurGrp = objReq.PurGrp;
+            prop.RelGrp = objReq.RelGrp;
+            prop.RelCode = objReq.RelCode;
+            prop.DocType = objReq.DocType;
+            //prop.Password = prop.SplitValueEncode[6].ToString().Split('=')[1].ToString();  
+            IRfcFunction customerBapi = repo.CreateFunction("ZMM_LIST_PR_REL_HDR_RFC");
+            customerBapi.SetValue("BNAME", prop.UserName);
+            customerBapi.SetValue("I_WERKS", prop.Plant);
+            customerBapi.SetValue("I_EKGRP", prop.PurGrp);
+            customerBapi.SetValue("I_FRGGR", prop.RelGrp);
+            customerBapi.SetValue("I_FRGCO", prop.RelCode);
+            customerBapi.SetValue("I_BSART", prop.DocType);
+            //  customerBapi.SetValue("PASSWORD", prop.Password);
+            customerBapi.Invoke(destination);
+            prop.Status = customerBapi.GetString("I_STATUS");
+            IRfcTable ZTT_PR_REL_HDR = customerBapi.GetTable("I_PR_REL_HDR");
+            // if (prop.Status == "No record found!!" || prop.Status == "Invalid login credential!" || prop.Status == "No authorization!!")
+            if (prop.Status != "")
+            {
+                PRHeaderOutput objPRHdr = new PRHeaderOutput();
+                objPRHdr.Error = prop.Status;
+                PRHeaderArray.Add(objPRHdr);
+                LogWrite("RESPONSE : " + objPRHdr.Error);
+            }
+            else
+            {
+                for (int cuIndex = 0; cuIndex < ZTT_PR_REL_HDR.RowCount; cuIndex++)
+                {
+                    PRHeaderOutput objPRHdr = new PRHeaderOutput();
+                    objPRHdr.PR_Number = ZTT_PR_REL_HDR[cuIndex].GetString("PREQ_NO");
+                    objPRHdr.Doc_Type = ZTT_PR_REL_HDR[cuIndex].GetString("DOC_TYPE");
+                    objPRHdr.Created_By = ZTT_PR_REL_HDR[cuIndex].GetString("CREATED_BY");
+                    objPRHdr.Purchase_Group = ZTT_PR_REL_HDR[cuIndex].GetString("PUR_GROUP");
+                    objPRHdr.Requester_Name = ZTT_PR_REL_HDR[cuIndex].GetString("PREQ_NAME");
+                    objPRHdr.PR_Date = ZTT_PR_REL_HDR[cuIndex].GetString("PREQ_DATE");
+                    objPRHdr.Total_PR_Value = ZTT_PR_REL_HDR[cuIndex].GetString("PR_VALUE");
+                    objPRHdr.Currency = ZTT_PR_REL_HDR[cuIndex].GetString("CURRENCY");
+
+                    prop.Message = prop.Message + " Record:" + cuIndex + "=" + (objPRHdr.PR_Number + "," + objPRHdr.Doc_Type + "," + objPRHdr.Created_By + ","
+                        + objPRHdr.Created_By + "," + objPRHdr.Purchase_Group + "," + objPRHdr.Requester_Name + ","
+                        + objPRHdr.PR_Date + "," + objPRHdr.Total_PR_Value);
+                    PRHeaderArray.Add(objPRHdr);
+                }
+                LogWrite("RESPONSE : " + prop.Message);
+            }
+        }
+        catch (RfcCommunicationException e)
+        {
+            LogWrite("Error : " + prop.Message);
+        }
+        catch (RfcLogonException e)
+        {
+            LogWrite("Error : " + e.Message.ToString());
+            // user could not logon...
+        }
+        catch (RfcAbapRuntimeException e)
+        {
+            LogWrite("Error : " + e.Message.ToString());
+            // serious problem on ABAP system side...
+        }
+        catch (RfcAbapBaseException e)
+        {
+            LogWrite("Error : " + e.Message.ToString());
+            // The function module returned an ABAP exception, an ABAP message
+            // or an ABAP class-based exception...
+        }
+
+        return PRHeaderArray;
+    }
+
+    public List<PRDetails> GetPRDetails(RfcDestination destination, PRHeaderInput objReq)
+    {
+        LogWrite("PRDetails Start");
+        try
+        {
+            RfcRepository repo = destination.Repository;
+            prop.GetUrlValues = HttpContext.Current.Request.Url.AbsoluteUri;
+            LogWrite("Request : " + prop.GetUrlValues);
+            prop.UserName = objReq.UserId;
+            prop.Plant = objReq.Plant;
+            prop.PurGrp = objReq.PurGrp;
+            prop.RelGrp = objReq.RelGrp;
+            prop.RelCode = objReq.RelCode;
+            prop.DocType = objReq.DocType;
+            //prop.Password = prop.SplitValueEncode[6].ToString().Split('=')[1].ToString();  
+            IRfcFunction customerBapi = repo.CreateFunction("ZMM_LIST_PR_REL_HDR_RFC");
+            customerBapi.SetValue("BNAME", prop.UserName);
+            customerBapi.SetValue("I_WERKS", prop.Plant);
+            customerBapi.SetValue("I_EKGRP", prop.PurGrp);
+            customerBapi.SetValue("I_FRGGR", prop.RelGrp);
+            customerBapi.SetValue("I_FRGCO", prop.RelCode);
+            customerBapi.SetValue("I_BSART", prop.DocType);
+            //  customerBapi.SetValue("PASSWORD", prop.Password);
+            customerBapi.Invoke(destination);
+            prop.Status = customerBapi.GetString("I_STATUS");
+            IRfcTable ZTT_PR_REL_ITEM = customerBapi.GetTable("I_PR_REL_ITEM");
+            // if (prop.Status == "No record found!!" || prop.Status == "Invalid login credential!" || prop.Status == "No authorization!!")
+            if (prop.Status != "")
+            {
+                PRDetails objPRDetails = new PRDetails();
+                objPRDetails.Error = prop.Status;
+                PRDetialsArray.Add(objPRDetails);
+                LogWrite("RESPONSE : " + objPRDetails.Error);
+            }
+            else
+            {
+                LogWrite("RESPONSE : " + ZTT_PR_REL_ITEM.RowCount);
+                for (int cuIndex = 0; cuIndex < ZTT_PR_REL_ITEM.RowCount; cuIndex++)
+                {
+                    PRDetails objPRDetails = new PRDetails();
+                    objPRDetails.PR_Number = ZTT_PR_REL_ITEM[cuIndex].GetString("PREQ_NO");
+                    objPRDetails.PR_Item_No = ZTT_PR_REL_ITEM[cuIndex].GetString("PREQ_ITEM");
+                    objPRDetails.Doc_Type = ZTT_PR_REL_ITEM[cuIndex].GetString("DOC_TYPE");
+                    objPRDetails.Purchase_Group = ZTT_PR_REL_ITEM[cuIndex].GetString("PUR_GROUP");
+                    objPRDetails.Requester_Name = ZTT_PR_REL_ITEM[cuIndex].GetString("PREQ_NAME");
+                    objPRDetails.Pr_Date = ZTT_PR_REL_ITEM[cuIndex].GetString("PREQ_DATE");
+                    objPRDetails.Description = ZTT_PR_REL_ITEM[cuIndex].GetString("SHORT_TEXT");
+                    objPRDetails.Material_Code = ZTT_PR_REL_ITEM[cuIndex].GetString("MATERIAL");
+                    objPRDetails.Plant = ZTT_PR_REL_ITEM[cuIndex].GetString("PLANT");
+                    objPRDetails.Quantity = ZTT_PR_REL_ITEM[cuIndex].GetString("QUANTITY");
+                    objPRDetails.UOM = ZTT_PR_REL_ITEM[cuIndex].GetString("UNIT");
+                    objPRDetails.Unit_Price = ZTT_PR_REL_ITEM[cuIndex].GetString("C_AMT_BAPI");
+                    objPRDetails.Price_Unit = ZTT_PR_REL_ITEM[cuIndex].GetString("PRICE_UNIT");
+                    if (ZTT_PR_REL_ITEM[cuIndex].GetString("ITEM_CAT").ToString() == "0")
+                    {
+                        objPRDetails.Item_Category = ConfigurationManager.AppSettings["0"].ToString();
+                    }
+                    else if (ZTT_PR_REL_ITEM[cuIndex].GetString("ITEM_CAT").ToString() == "1")
+                    {
+                        objPRDetails.Item_Category = ConfigurationManager.AppSettings["1"].ToString();
+                    }
+                    else if (ZTT_PR_REL_ITEM[cuIndex].GetString("ITEM_CAT").ToString() == "2")
+                    {
+                        objPRDetails.Item_Category = ConfigurationManager.AppSettings["2"].ToString();
+                    }
+                    else if (ZTT_PR_REL_ITEM[cuIndex].GetString("ITEM_CAT").ToString() == "3")
+                    {
+                        objPRDetails.Item_Category = ConfigurationManager.AppSettings["3"].ToString();
+                    }
+                    else if (ZTT_PR_REL_ITEM[cuIndex].GetString("ITEM_CAT").ToString() == "4")
+                    {
+                        objPRDetails.Item_Category = ConfigurationManager.AppSettings["4"].ToString();
+                    }
+                    else if (ZTT_PR_REL_ITEM[cuIndex].GetString("ITEM_CAT").ToString() == "5")
+                    {
+                        objPRDetails.Item_Category = ConfigurationManager.AppSettings["5"].ToString();
+                    }
+                    else if (ZTT_PR_REL_ITEM[cuIndex].GetString("ITEM_CAT").ToString() == "6")
+                    {
+                        objPRDetails.Item_Category = ConfigurationManager.AppSettings["6"].ToString();
+                    }
+                    else if (ZTT_PR_REL_ITEM[cuIndex].GetString("ITEM_CAT").ToString() == "7")
+                    {
+                        objPRDetails.Item_Category = ConfigurationManager.AppSettings["7"].ToString();
+                    }
+                    if (ZTT_PR_REL_ITEM[cuIndex].GetString("ITEM_CAT").ToString() == "8")
+                    {
+                        objPRDetails.Item_Category = ConfigurationManager.AppSettings["8"].ToString();
+                    }
+                    else if (ZTT_PR_REL_ITEM[cuIndex].GetString("ITEM_CAT").ToString() == "9")
+                    {
+                        objPRDetails.Item_Category = ConfigurationManager.AppSettings["9"].ToString();
+                    }
+                    objPRDetails.Account_Type = ZTT_PR_REL_ITEM[cuIndex].GetString("ACCTASSCAT");
+                    objPRDetails.Item_Value = ZTT_PR_REL_ITEM[cuIndex].GetString("ITEM_VALUE");
+                    objPRDetails.GL_Number = ZTT_PR_REL_ITEM[cuIndex].GetString("GL_ACCOUNT");
+                    objPRDetails.WBS = ZTT_PR_REL_ITEM[cuIndex].GetString("CC_WBS_NETWORK");
+                    objPRDetails.Currency = ZTT_PR_REL_ITEM[cuIndex].GetString("CURRENCY");
+
+
+                    prop.Message = prop.Message + " Record:" + cuIndex + "=" + (objPRDetails.PR_Number + "," + objPRDetails.PR_Item_No + "," + objPRDetails.Doc_Type + ","
+                        + objPRDetails.Purchase_Group + "," + objPRDetails.Requester_Name + "," + objPRDetails.Pr_Date + ","
+                        + objPRDetails.Description + "," + objPRDetails.Material_Code + "," + objPRDetails.Plant + ","
+                        + objPRDetails.Quantity + "," + objPRDetails.UOM + "," + objPRDetails.Unit_Price + ","
+                        + objPRDetails.Price_Unit + "," + objPRDetails.Item_Category + "," + objPRDetails.Account_Type + "," + objPRDetails.Item_Value + "," + objPRDetails.GL_Number + "," + objPRDetails.WBS + "," + objPRDetails.Currency);
+                    PRDetialsArray.Add(objPRDetails);
+                }
+                LogWrite("RESPONSE : " + prop.Message);
+            }
+            LogWrite("" + PRDetialsArray.Count);
+        }
+
+        catch (RfcCommunicationException e)
+        {
+            LogWrite("Error1 : " + prop.Message);
+        }
+        catch (RfcLogonException e)
+        {
+            LogWrite("Error2 : " + e.Message.ToString());
+            // user could not logon...
+        }
+        catch (RfcAbapRuntimeException e)
+        {
+            LogWrite("Error3 : " + e.Message.ToString());
+            // serious problem on ABAP system side...
+        }
+        catch (RfcAbapBaseException e)
+        {
+            LogWrite("Error4 : " + e.Message.ToString());
+            // The function module returned an ABAP exception, an ABAP message
+            // or an ABAP class-based exception...
+        }
+        return PRDetialsArray;
+    }
+
+    public string PRApproveRejectIndicator(RfcDestination destination, PRApproveReject objReq)
+    {
+        PRApproveRejectStatus objPRAR = new PRApproveRejectStatus();
+
+        try
+        {
+
+            RfcRepository repo = destination.Repository;
+            prop.GetUrlValues = HttpContext.Current.Request.Url.AbsoluteUri;
+            LogWrite("Request : " + prop.GetUrlValues);
+            prop.UserName = objReq.UserId;
+            prop.Password = objReq.Password;
+            prop.PRNO = objReq.PR_Number;
+            prop.Plant = objReq.Plant;
+            prop.RelGrp = objReq.RelGrp;
+            prop.RelCode = objReq.RelCode;
+            prop.DocType = objReq.DocType;
+            prop.Status = objReq.Status;
+
+            IRfcFunction customerBapi = repo.CreateFunction("ZMM_APPROVE_REJECT_PR_RFC");
+            customerBapi.SetValue("BNAME", prop.UserName);
+            customerBapi.SetValue("PASSWORD", prop.Password);
+            customerBapi.SetValue("I_BANFN", prop.PRNO);
+            customerBapi.SetValue("I_WERKS", prop.Plant);
+            customerBapi.SetValue("I_FRGGR", prop.RelGrp);
+            customerBapi.SetValue("I_FRGCO", prop.RelCode);
+            customerBapi.SetValue("I_BSART", prop.DocType);
+            customerBapi.SetValue("I_POSTAT", prop.Status);
+            customerBapi.Invoke(destination);
+
+            objPRAR.Status = customerBapi.GetString("I_STATUS");
+
+            LogWrite("RESPONSE : " + objPRAR.Status);
+        }
+        catch (RfcCommunicationException e)
+        {
+            LogWrite("Error : " + e.Message.ToString());
+            objPRAR.Status = e.Message.ToString();
+        }
+        catch (RfcLogonException e)
+        {
+            LogWrite("Error : " + e.Message.ToString());
+            objPRAR.Status = e.Message.ToString();
+            // user could not logon...
+        }
+        catch (RfcAbapRuntimeException e)
+        {
+            LogWrite("Error : " + e.Message.ToString());
+            objPRAR.Status = e.Message.ToString();
+            // serious problem on ABAP system side...
+        }
+        catch (RfcAbapBaseException e)
+        {
+            LogWrite("Error : " + e.Message.ToString());
+            objPRAR.Status = e.Message.ToString();
+            // The function module returned an ABAP exception, an ABAP message
+            // or an ABAP class-based exception...
+        }
+
+        return objPRAR.Status.ToString();
+    }
+
+    //  BELOW CODE BY INCAENDO-MANOJ FOR NEW SALES ORDERs for Approval
+    public List<SalesOrder> GetSalesOrderForApproval(RfcDestination destination, SalesOrderInput objReq)
+    {
+        LogWrite("GetSalesOrderForApproval Start");
+        List<SalesOrder> salesOrderArray = new List<SalesOrder>();
+        try
+        {
+            RfcRepository repo = destination.Repository;
+            IRfcFunction customerBapi = repo.CreateFunction("Z_RFC_SD_SO_APPROVAL_LIST");
+            customerBapi.SetValue("I_AUDAT_FROM", objReq.FromDate);
+            customerBapi.SetValue("I_AUDAT_TO", objReq.ToDate);
+            customerBapi.SetValue("I_UNAME", objReq.UserName);
+            customerBapi.SetValue("I_VKORG", objReq.SalesOrgCode);
+            customerBapi.Invoke(destination);
+
+            IRfcTable objTableResponse = customerBapi.GetTable("T_Output");
+
+            LogWrite("RESPONSE : " + objTableResponse.RowCount);
+
+            Hashtable tbl = new Hashtable();
+            
+            for (int cuIndex = 0; cuIndex < objTableResponse.RowCount; cuIndex++)
+            {
+                string orderNo = objTableResponse[cuIndex].GetString("VBELN");
+                SalesOrder objSalesOrder = null;
+                if (tbl[orderNo] == null)
+                {
+                    tbl[orderNo] = new SalesOrder();
+                    objSalesOrder = (SalesOrder)tbl[orderNo];
+                    objSalesOrder.SalesDocument = objTableResponse[cuIndex].GetString("VBELN");
+                    objSalesOrder.CustomerCode = objTableResponse[cuIndex].GetString("KUNNR");
+                    objSalesOrder.CustomerName = objTableResponse[cuIndex].GetString("NAME1");
+                    objSalesOrder.Country = objTableResponse[cuIndex].GetString("LAND1");
+                    objSalesOrder.Currency = objTableResponse[cuIndex].GetString("WAERK");
+                    objSalesOrder.POPrice = 0.0;
+                    objSalesOrder.Items = new List<SalesItem>();
+                }
+                else
+                    objSalesOrder = (SalesOrder)tbl[orderNo];
+                SalesItem item = new SalesItem();
+                item.SalesDocumentItem = objTableResponse[cuIndex].GetString("POSNR");
+                item.POPrice = objTableResponse[cuIndex].GetDouble("ZRPR");
+                item.Quantity = objTableResponse[cuIndex].GetInt("KWMENG");
+                item.SalesUnitType = objTableResponse[cuIndex].GetString("VRKME");
+                item.MaterialNumber = objTableResponse[cuIndex].GetString("MATNR");
+                item.SalesOrderItemCode = objTableResponse[cuIndex].GetString("ARKTX");
+                item.Plant = objTableResponse[cuIndex].GetString("WERKS");
+                item.Currency = objTableResponse[cuIndex].GetString("WAERK");
+                item.POUnitPrice = objTableResponse[cuIndex].GetDouble("ZRPR_RATE");
+                item.ScheduleLineData = objTableResponse[cuIndex].GetString("EDATU");
+                objSalesOrder.POPrice += item.POPrice;
+                objSalesOrder.Items.Add(item);
+                tbl[orderNo] = objSalesOrder;
+            }
+
+            foreach(DictionaryEntry orderKey in tbl)
+            {
+                salesOrderArray.Add((SalesOrder)tbl[orderKey.Key]);
+            }
+            LogWrite("RESPONSE : " + prop.Message);
+            LogWrite("" + PRDetialsArray.Count);
+        }
+
+        catch (RfcCommunicationException e)
+        {
+            LogWrite("Error1 : " + prop.Message);
+        }
+        catch (RfcLogonException e)
+        {
+            LogWrite("Error2 : " + e.Message.ToString());
+            // user could not logon...
+        }
+        catch (RfcAbapRuntimeException e)
+        {
+            LogWrite("Error3 : " + e.Message.ToString());
+            // serious problem on ABAP system side...
+        }
+        catch (RfcAbapBaseException e)
+        {
+            LogWrite("Error4 : " + e.Message.ToString());
+            // The function module returned an ABAP exception, an ABAP message
+            // or an ABAP class-based exception...
+        }
+
+        return salesOrderArray;
+    }
+
+    public string GetUserApprovalType(RfcDestination destination, SalesOrderInput objReq)
+    {
+        LogWrite("GetUserApprovalType Start");
+        string roleType = string.Empty;
+        try
+        {
+            RfcRepository repo = destination.Repository;
+            IRfcFunction customerBapi = repo.CreateFunction("ZSD_RFC_GET_USERCAT_MOBILEAPP");
+            customerBapi.SetValue("I_UNAME", objReq.UserName);
+            customerBapi.SetValue("I_SORG", objReq.SalesOrgCode);
+            customerBapi.Invoke(destination);
+            roleType= customerBapi.GetString("O_ROLE");
+            //IRfcTable objTableResponse = customerBapi.GetTable("T_Output");
+        }
+        
+        catch (RfcCommunicationException e)
+        {
+            LogWrite("Error1 : " + prop.Message);
+        }
+        catch (RfcLogonException e)
+        {
+            LogWrite("Error2 : " + e.Message.ToString());
+            // user could not logon...
+        }
+        catch (RfcAbapRuntimeException e)
+        {
+            LogWrite("Error3 : " + e.Message.ToString());
+            // serious problem on ABAP system side...
+        }
+        catch (RfcAbapBaseException e)
+        {
+            LogWrite("Error4 : " + e.Message.ToString());
+            // The function module returned an ABAP exception, an ABAP message
+            // or an ABAP class-based exception...
+        }
+        return roleType;
+    }
+
+    public string SendOrderApproval(RfcDestination destination, SalesOrderInput objReq)
+    {
+        LogWrite("GetUserApprovalType Start");
+        string returnValue = string.Empty;
+        try
+        {
+            RfcRepository repo = destination.Repository;
+            IRfcFunction customerBapi = repo.CreateFunction("ZSD_RFC_APPROVE_SO_STATUS_MAPP");
+            customerBapi.SetValue("I_UNAME", objReq.UserName);
+            customerBapi.SetValue("I_CODE", objReq.ApprovalCode);
+            customerBapi.SetValue("I_POSNR", objReq.SalesItemNo);
+            customerBapi.SetValue("I_VBELN", objReq.SalesOrderNo);
+            customerBapi.Invoke(destination);
+            //IRfcTable objTableResponse = customerBapi.GetTable("E_RETURN");
+            IRfcStructure  structureObject  = customerBapi.GetStructure("E_RETURN");
+            returnValue = "{";
+            for (int i=0; i<structureObject.Count;i++)
+            {
+                returnValue += "\"" + structureObject.Metadata[i].Name + "\": \"" + structureObject.GetString(i)+"\"";
+                if (i < structureObject.Count - 1)
+                    returnValue += ", ";
+            }
+            returnValue += "}";         
+        }
+
+        catch (RfcCommunicationException e)
+        {
+            LogWrite("Error1 : " + prop.Message);
+        }
+        catch (RfcLogonException e)
+        {
+            LogWrite("Error2 : " + e.Message.ToString());
+            // user could not logon...
+        }
+        catch (RfcAbapRuntimeException e)
+        {
+            LogWrite("Error3 : " + e.Message.ToString());
+            // serious problem on ABAP system side...
+        }
+        catch (RfcAbapBaseException e)
+        {
+            LogWrite("Error4 : " + e.Message.ToString());
+            // The function module returned an ABAP exception, an ABAP message
+            // or an ABAP class-based exception...
+        }
+        return returnValue;
+    }
+    public string LogWrite(string query)
+    {
+        System.IO.StreamWriter file = null;
+        try
+        {
+            string filename = "C:\\SapError\\APILOG_" + System.DateTime.Now.ToString("MM-dd-yyyy") + ".txt";
+            file = new System.IO.StreamWriter(filename, true);
+            file.WriteLine("=========================" + System.DateTime.Now.ToString() + "======================>\r\n" + query);
+            file.Close();
+        }
+        catch (Exception ex)
+        { }
+        return "Y";
+    }
+}
