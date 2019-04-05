@@ -1,0 +1,480 @@
+
+using JubilantService.Common;
+using JubilantService.Model;
+using JubilantService.SAP_Model;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
+using System;
+using System.Collections.Generic;
+using System.Configuration;
+using System.IO;
+using System.Linq;
+using System.Net.Http;
+using System.Runtime.Serialization;
+using System.Runtime.Serialization.Formatters.Binary;
+using System.ServiceModel;
+using System.Text;
+using System.Text.RegularExpressions;
+using System.Web.Services;
+using System.Xml;
+using System.Xml.Serialization;
+
+namespace JubilantService
+{
+    // NOTE: You can use the "Rename" command on the "Refactor" menu to change the class name "SAPService" in code, svc and config file together.
+    // NOTE: In order to launch WCF Test Client for testing this service, please select SAPService.svc or SAPService.svc.cs at the Solution Explorer and start debugging.
+    public class SAPService : ISAPService
+    {
+        string userdetails = ConfigurationManager.AppSettings["UserDetailsPath"].ToString();
+        string managerdetails = ConfigurationManager.AppSettings["ManagerDetailsPath"].ToString();
+        string userfeedback = ConfigurationManager.AppSettings["UserFeedbackPath"].ToString();
+        string managerfeedback = ConfigurationManager.AppSettings["ManagerFeedbackPath"].ToString();
+        RFCDetails rfcDetails = new RFCDetails();
+        Property prop = new Property();
+        List<JubilantService.SAP_Model.Login> LGNLIST = new List<JubilantService.SAP_Model.Login>();
+        List<PurchaseOrg> PurchaseOrgArray = new List<PurchaseOrg>();
+        List<PurchaseGrp> PurchaseGrpArray = new List<PurchaseGrp>();
+        List<ReleaseGrp> ReleaseGrpArray = new List<ReleaseGrp>();
+        List<ReleaseCodes> ReleaseCodesArray = new List<ReleaseCodes>();
+        List<DocumentType> DocumentTypeArray = new List<DocumentType>();
+        List<ReleaseConfiguration> objFinalList = new List<ReleaseConfiguration>();
+        List<PendingOrderHdr> PendingOrderHdrArray = new List<PendingOrderHdr>();
+        List<PendingOrderDet> PendingOrderDetArray = new List<PendingOrderDet>();
+        List<POApproveReject> POApproveRejectArray = new List<POApproveReject>();
+        ConfigDetails config = new ConfigDetails();
+        List<PRHeaderOutput> PRHeaderArray = new List<PRHeaderOutput>();
+        List<PRDetails> PRDetialsArray = new List<PRDetails>();
+        List<PRApproveRejectStatus> PRApproveRejectArray = new List<PRApproveRejectStatus>();
+        Feedback.FinalDataUser FinalDataUser = new Feedback.FinalDataUser();
+        Feedback.FinalDataManager FinalDataManger = new Feedback.FinalDataManager();
+        public List<JubilantService.SAP_Model.Login> LoginCheck()
+        {
+            try
+            {
+                if (SAPSystemConnect.CheckConnect(prop))
+                    LGNLIST = rfcDetails.LoginDetails(prop.RfcDestination);
+
+            }
+            catch (Exception exe)
+            {
+                ErrorWrite("Error :" + exe.Message.ToString());
+            }
+            return LGNLIST;
+        }
+        [WebMethod]
+        public List<ReleaseGrp> GetPOReleaseGroup()
+        {
+            try
+            {
+                if (SAPSystemConnect.CheckConnect(prop))
+                    ReleaseGrpArray = rfcDetails.ReleaseGroup(prop.RfcDestination);
+            }
+            catch (Exception exe)
+            {
+                ErrorWrite("Error :" + exe.Message.ToString());
+            }
+            return ReleaseGrpArray;
+        }
+        [WebMethod]
+        public List<ReleaseCodes> GetReleaseCodes(string ReleaseGrp)
+        {
+            try
+            {
+                //  Hashtable htnew = new Hashtable();  
+                prop.RelGrp = ReleaseGrp.Trim();
+                if (SAPSystemConnect.CheckConnect(prop))
+                    ReleaseCodesArray = rfcDetails.GetReleaseCodes(prop.RfcDestination, prop.RelGrp);
+            }
+            catch (Exception exe)
+            {
+                ErrorWrite("Error :" + exe.Message.ToString());
+            }
+            return ReleaseCodesArray;
+
+        }
+        [WebMethod]
+        public List<PurchaseOrg> GetPurchaseOrg()
+        {
+            try
+            {
+                if (SAPSystemConnect.CheckConnect(prop))
+                    PurchaseOrgArray = rfcDetails.GetPurchaseOrg(prop.RfcDestination);
+            }
+            catch (Exception exe)
+            {
+                ErrorWrite("Error :" + exe.Message.ToString());
+            }
+            return PurchaseOrgArray;
+        }
+        [WebMethod]
+        public List<PurchaseGrp> GetPurchaseGrp()
+        {
+            try
+            {
+
+                if (SAPSystemConnect.CheckConnect(prop))
+                    PurchaseGrpArray = rfcDetails.GetPurchaseGrp(prop.RfcDestination);
+            }
+            catch (Exception exe)
+            {
+                ErrorWrite("Error :" + exe.Message.ToString());
+            }
+            return PurchaseGrpArray;
+        }
+        [WebMethod]
+        public List<DocumentType> GetDocumentType()
+        {
+            try
+            {
+
+                if (SAPSystemConnect.CheckConnect(prop))
+                    DocumentTypeArray = rfcDetails.GetDocumentType(prop.RfcDestination);
+            }
+            catch (Exception exe)
+            {
+                ErrorWrite("Error :" + exe.Message.ToString());
+            }
+            return DocumentTypeArray;
+        }
+        [WebMethod]
+        public List<ReleaseConfiguration> GetPOReleaseConfiguration()
+        {
+            try
+            {
+                if (SAPSystemConnect.CheckConnect(prop))
+                    objFinalList = rfcDetails.ReleaseConfiguration(prop.RfcDestination);
+            }
+            catch (Exception exe)
+            {
+                ErrorWrite("Error :" + exe.Message.ToString());
+            }
+            return objFinalList;
+        }
+        [WebMethod]
+        public List<PendingOrderHdr> GetPendingOrderHdr()
+        {
+            try
+            {
+                if (SAPSystemConnect.CheckConnect(prop))
+                    PendingOrderHdrArray = rfcDetails.POReleaseHeader(prop.RfcDestination);
+            }
+            catch (Exception exe)
+            {
+                ErrorWrite("Error :" + exe.Message.ToString());
+            }
+            return PendingOrderHdrArray;
+        }
+        [WebMethod]
+        public List<POApproveReject> GetPOApproveReject()
+        {
+            try
+            {
+                if (SAPSystemConnect.CheckConnect(prop))
+                    POApproveRejectArray = rfcDetails.POApproveRejectIndicator(prop.RfcDestination);
+            }
+            catch (Exception exe)
+            {
+                ErrorWrite("Error :" + exe.Message.ToString());
+            }
+            return POApproveRejectArray;
+        }
+        [WebMethod]
+        public List<PendingOrderDet> GetPendingOrderDet()
+        {
+            try
+            {
+                if (SAPSystemConnect.CheckConnect(prop))
+                    PendingOrderDetArray = rfcDetails.POReleaseItemDet(prop.RfcDestination);
+            }
+            catch (Exception exe)
+            {
+                ErrorWrite("Error :" + exe.Message.ToString());
+            }
+            return PendingOrderDetArray;
+        }
+        [WebMethod]
+        public POModels GetPOMaster()
+        {
+            try
+            {
+                if (SAPSystemConnect.CheckConnect(prop))
+                    ReleaseGrpArray = rfcDetails.ReleaseGroup(prop.RfcDestination);
+            }
+            catch (Exception exe)
+            {
+                ErrorWrite("Error :" + exe.Message.ToString());
+            }
+
+            try
+            {
+                if (SAPSystemConnect.CheckConnect(prop))
+                    PurchaseOrgArray = rfcDetails.GetPurchaseOrg(prop.RfcDestination);
+            }
+            catch (Exception exe)
+            {
+                ErrorWrite("Error :" + exe.Message.ToString());
+            }
+
+            try
+            {
+
+                if (SAPSystemConnect.CheckConnect(prop))
+                    PurchaseGrpArray = rfcDetails.GetPurchaseGrp(prop.RfcDestination);
+            }
+            catch (Exception exe)
+            {
+                ErrorWrite("Error :" + exe.Message.ToString());
+            }
+
+            try
+            {
+
+                if (SAPSystemConnect.CheckConnect(prop))
+                    DocumentTypeArray = rfcDetails.GetDocumentType(prop.RfcDestination);
+            }
+            catch (Exception exe)
+            {
+                ErrorWrite("Error :" + exe.Message.ToString());
+            }
+            POModels po = new POModels();
+            po.rglist = ReleaseGrpArray;
+            po.pglist = PurchaseGrpArray;
+            po.polist = PurchaseOrgArray;
+            po.dtlist = DocumentTypeArray;
+            return po;
+        }
+        [WebMethod]
+        public ConfigDetails GetConfigDetails()
+        {
+            try
+            {
+                if (SAPSystemConnect.CheckConnect(prop))
+                    config = rfcDetails.GetConfigDetails(prop.RfcDestination);
+            }
+            catch (Exception exe)
+            {
+                ErrorWrite("Error :" + exe.Message.ToString());
+            }
+            return config;
+        }
+        [WebMethod]
+        public List<PRHeaderOutput> GetPRHeader(PRHeaderInput objReq)
+        {
+            try
+            {
+                if (SAPSystemConnect.CheckConnect(prop))
+                    PRHeaderArray = rfcDetails.GetPRHeader(prop.RfcDestination, objReq);
+            }
+            catch (Exception exe)
+            {
+                ErrorWrite("Error :" + exe.Message.ToString());
+            }
+            return PRHeaderArray;
+        }
+        public List<PRDetails> GetPRDetails(PRHeaderInput objReq)
+        {
+            try
+            {
+                if (SAPSystemConnect.CheckConnect(prop))
+                    PRDetialsArray = rfcDetails.GetPRDetails(prop.RfcDestination, objReq);
+            }
+            catch (Exception exe)
+            {
+                ErrorWrite("Error :" + exe.Message.ToString());
+            }
+            return PRDetialsArray;
+        }
+
+        [WebMethod]
+        public string GetPRApproveReject(PRApproveReject objReq)
+        {
+            string result = null;
+            try
+            {
+                if (SAPSystemConnect.CheckConnect(prop))
+                    result = rfcDetails.PRApproveRejectIndicator(prop.RfcDestination, objReq);
+            }
+            catch (Exception exe)
+            {
+                ErrorWrite("Error :" + exe.Message.ToString());
+            }
+            return result;
+        }
+        public string ErrorWrite(string query)
+        {
+            System.IO.StreamWriter file = null;
+            try
+            {
+                string filename = "C:\\SapError\\APILOG_" + System.DateTime.Now.ToString("MM-dd-yyyy") + ".txt";
+                file = new System.IO.StreamWriter(filename, true);
+                file.WriteLine("=========================" + System.DateTime.Now.ToString() + "======================>\r\n" + query);
+                file.Close();
+
+            }
+            catch (Exception ex)
+            { }
+            return "Y";
+        }
+        [WebMethod]
+        public Feedback.FinalDataUser GetUserDetailsForFeedback(string UserId)
+        {
+            JObject data = null;
+            try
+            {
+                HttpClient client = new HttpClient();
+                var res = client.GetAsync(userdetails + UserId).Result;
+                string resultContent = res.Content.ReadAsStringAsync().Result;
+                string content = resultContent.Replace("<?xml version=\"1.0\"?>", "");
+                XmlDocument doc = new XmlDocument();
+                doc.LoadXml(content);
+                string json = JsonConvert.SerializeXmlNode(doc);
+                data = JObject.Parse(json);
+                FinalDataUser = data.ToObject<Feedback.FinalDataUser>();
+               // ErrorWrite(UserId.ToString());
+
+            }
+            catch (Exception exe)
+            {
+                ErrorWrite("Error :" + exe.Message.ToString());
+            }
+            return FinalDataUser;
+        }
+        [WebMethod]
+        public Feedback.FinalDataManager GetManagerDetailsForFeedback(string ManagerId)
+        {
+            try
+            {
+                HttpClient client = new HttpClient();
+
+                var res = client.GetAsync(managerdetails + ManagerId).Result;
+                string resultContent = res.Content.ReadAsStringAsync().Result;
+                string content = resultContent.Replace("<?xml version=\"1.0\"?>", "");
+                XmlDocument doc = new XmlDocument();
+                doc.LoadXml(content);
+                string json = JsonConvert.SerializeXmlNode(doc);
+                int count = Regex.Matches(json, "Eligible\":").Count;
+                if (count == 1)
+                    json = json.Replace("Employee\":", "Employee\":[").Replace("}}}}", "}]}}}");
+                FinalDataManger = JsonConvert.DeserializeObject<Feedback.FinalDataManager>(json);
+            }
+            catch (Exception exe)
+            {
+                ErrorWrite("Error :" + exe.Message.ToString());
+            }
+            return FinalDataManger;
+        }
+        [WebMethod]
+        public string FeedbackByEmployee(J_FIRST90_EMP_FEEDBACK objReq)
+        {
+
+            string result = null;
+            JObject data = null;
+
+
+            try
+            {
+                var stringwriter = new System.IO.StringWriter();
+                var serializer = new XmlSerializer(objReq.GetType());
+                serializer.Serialize(stringwriter, objReq);
+                HttpClient client = new HttpClient();
+                var json = JsonConvert.SerializeObject(objReq);
+                var req = new StringContent(stringwriter.ToString(), Encoding.UTF8, "application/xml");
+                var res = client.PutAsync(userfeedback, req).Result;
+                string resultContent = res.Content.ReadAsStringAsync().Result;
+                string content = resultContent.Replace("<?xml version=\"1.0\"?>", "");
+                XmlDocument docresult = new XmlDocument();
+                docresult.LoadXml(content);
+                string jsonresult = JsonConvert.SerializeXmlNode(docresult);
+                data = JObject.Parse(jsonresult);
+                //ErrorWrite(data.ToString());
+                result = data["RESP"]["msgdata"].ToString();
+
+
+            }
+            catch (Exception exe)
+            {
+                ErrorWrite("Error :" + exe.Message.ToString());
+            }
+            return result;
+        }
+        [WebMethod]
+        public string FeedbackByManager(J_FIRST90_MGR_ASSESSMENT objReq)
+        {
+            string result = null;
+            JObject data = null;
+
+
+            try
+            {
+                var stringwriter = new System.IO.StringWriter();
+                var serializer = new XmlSerializer(objReq.GetType());
+                serializer.Serialize(stringwriter, objReq);
+                HttpClient client = new HttpClient();
+                var json = JsonConvert.SerializeObject(objReq);
+                var req = new StringContent(stringwriter.ToString(), Encoding.UTF8, "application/xml");
+                var res = client.PutAsync(managerfeedback, req).Result;
+                string resultContent = res.Content.ReadAsStringAsync().Result;
+                string content = resultContent.Replace("<?xml version=\"1.0\"?>", "");
+                XmlDocument docresult = new XmlDocument();
+                docresult.LoadXml(content);
+                string jsonresult = JsonConvert.SerializeXmlNode(docresult);
+                data = JObject.Parse(jsonresult);
+                result = data["RESP"]["msgdata"].ToString();
+
+
+            }
+            catch (Exception exe)
+            {
+                ErrorWrite("Error :" + exe.Message.ToString());
+            }
+            return result;
+        }
+
+        /// <summary>
+        /// CODE BY INCAENDO_MANOJ
+        /// </summary>
+        /// <param name="objReq"></param>
+        /// <returns></returns>
+        [WebMethod]
+        public MobileResponse ManageMobileData(MobileRequest objReq)
+        {
+            MobileResponse resp = new MobileResponse();
+            resp.HeaderKey = ""; //TODO
+            resp.MethodName = objReq.MethodName;
+            resp.Status = "success"; 
+            try{
+                SalesOrderInput inputObject;
+                string jsonBack = Encoding.UTF8.GetString(Convert.FromBase64String(objReq.Request));
+                if (SAPSystemConnect.CheckConnect(prop)){
+                    switch (objReq.MethodName.ToUpper()){
+                        case "GETPENDINGSALESORDERS":
+                            inputObject = JsonConvert.DeserializeObject<SalesOrderInput>(jsonBack);
+                            List<SalesOrder> order = rfcDetails.GetSalesOrderForApproval(prop.RfcDestination, inputObject);
+                            //BELOW would be to convert order list to bytes and then to base 64 string
+                            resp.Response = Utility.SerializeBase64(order);
+                            break;
+                        case "GETUSERAPPROVALTYPE":
+                            inputObject = JsonConvert.DeserializeObject<SalesOrderInput>(jsonBack);
+                            string roleId = rfcDetails.GetUserApprovalType(prop.RfcDestination, inputObject);
+                            resp.Response = Utility.SerializeBase64(roleId);
+                            //resp.Response = roleId;
+                            break;
+                        case "SENDORDERAPPROVAL":
+                            inputObject = JsonConvert.DeserializeObject<SalesOrderInput>(jsonBack);
+                            string response = rfcDetails.SendOrderApproval(prop.RfcDestination, inputObject);
+                            resp.Response = Convert.ToBase64String(System.Text.Encoding.UTF8.GetBytes(response));
+                            break;
+                        default:
+                            break;
+                    }
+                }
+            }
+            catch (Exception exe){
+                resp.Status = "error";
+                ErrorWrite("Error :" + exe.Message.ToString());
+            }
+            return resp;
+        }
+       
+    }
+}
