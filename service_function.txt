@@ -1,0 +1,162 @@
+        #region SearchEvaluation
+        public InterviewEvaluationSearchResponse SearchInterviewEvaluation(IntEvalSearchRequest obj)
+        {
+            //LogNotification model = new LogNotification()
+            //{
+            //    JSONRESPONSE = JsonConvert.ToString(obj),
+            //    REQRECEVIED = DateTime.Now.TimeOfDay.ToString(),
+            //    PROCESSNAME = "View Interview Evaluation",
+            //    ERRORLOG = string.Empty,
+            //    MESSAGE = string.Empty,
+            //    EMPCODE = string.Empty,
+            //    STATUS = string.Empty,
+            //    EMPNAME = string.Empty,
+            //    RequestStatus = string.Empty,
+            //    RESDELIVERY = string.Empty,
+            //    NOTIFICATIONTYPE = string.Empty,
+            //    TITLE = string.Empty,
+            //    TITLECODE = string.Empty
+            //};
+            XmlDocument soapEnvelopeXml = CreateSoapEnvelopeSearchInterviewEvaluation(obj);
+            string results = ProcessSoapXMLRequest(soapEnvelopeXml, "J_INT_EVAL.5");
+            InterviewEvaluationSearchResponse responseObj = new InterviewEvaluationSearchResponse();
+            XmlDocument doc = new XmlDocument();
+            doc.LoadXml(results);
+            List<InterviewPersonalDetails> objlist = new List<InterviewPersonalDetails>();
+            XmlNodeList nodeList = doc.GetElementsByTagName("InterviewEvaluation");
+            XmlNodeList nodeList1 = doc.GetElementsByTagName("PersonalDetails");
+            if (nodeList1.Count > 0)
+            {
+                foreach (XmlNode node1 in nodeList1)
+                {
+                    objlist.Add(new InterviewPersonalDetails
+                    {
+                        PersonId = node1["PersonId"].InnerText,
+                        InterviewDt = node1["InterviewDt"].InnerText,
+                        Name = node1["Name"].InnerText,
+                        Job = node1["Job"].InnerText,
+                        JobOpeningId = node1["JobOpeningId"].InnerText,
+                        ApplicantGrade = node1["ApplicantGrade"] == null ? "" : node1["ApplicantGrade"].InnerText,
+                        ApplicantType = node1["ApplicantType"] == null ? "" : node1["ApplicantType"].InnerText,
+                    });
+                    responseObj.personaldetails = objlist;
+                }
+                //model.STATUS = ConfigurationManager.AppSettings["NotificationInActive"].ToString();
+                //model.RESDELIVERY = DateTime.Now.TimeOfDay.ToString();
+                //model.RequestStatus = "Success";
+                //CreateNotificationlog(model);
+            }
+            foreach (XmlNode node in nodeList)
+            {
+                responseObj.EmpId = node["EmpId"].InnerText;
+            }
+            return responseObj;
+        }
+        private static XmlDocument CreateSoapEnvelopeSearchInterviewEvaluation(IntEvalSearchRequest Obj)
+        {
+            XmlDocument soapEnvelop = new XmlDocument();
+            string soap = "<soapenv:Envelope xmlns:soapenv='http://schemas.xmlsoap.org/soap/envelope/' xmlns:j='http://xmlns.oracle.com/Enterprise/Tools/schemas/J_INT_EVAL_SRCH.J_INT_EVAL_SRCH.V1'>" +
+                          "<soapenv:Header/>" +
+                          "<soapenv:Body>" +
+                          "<j:InterviewEvaluation xsi:schemaLocation='http://xmlns.oracle.com/Enterprise/Tools/schemas/J_INT_EVAL_SRCH.J_INT_EVAL_SRCH.V1' xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance' xmlns='http://xmlns.oracle.com/Enterprise/Tools/schemas/J_INT_EVAL_SRCH.J_INT_EVAL_SRCH.V1'>" +
+                          "<j:EmpId>" + Obj.EmpId + "</j:EmpId>" +
+                          "<j:DateFrom>" + Obj.FromDate + "</j:DateFrom>" +
+                          "<j:DateTo>" + Obj.ToDate + "</j:DateTo>" +
+                          "</j:InterviewEvaluation>" +
+                          "</soapenv:Body>" +
+                          "</soapenv:Envelope>";
+            soapEnvelop.LoadXml(soap);
+            return soapEnvelop;
+        }
+        #endregion
+
+        #region CreateInterviewEvaluation
+        public CreateIntEvalResponse CreateInterviewEvaluation(IntEvalPersonSubmitRequest obj)
+        {
+            //LogNotification model = new LogNotification()
+            //{
+            //    JSONRESPONSE = JsonConvert.ToString(obj),
+            //    REQRECEVIED = DateTime.Now.TimeOfDay.ToString(),
+            //    PROCESSNAME = "View Interview Evaluation",
+            //    ERRORLOG = string.Empty,
+            //    MESSAGE = string.Empty,
+            //    EMPCODE = string.Empty,
+            //    STATUS = string.Empty,
+            //    EMPNAME = string.Empty,
+            //    RequestStatus = string.Empty,
+            //    RESDELIVERY = string.Empty,
+            //    NOTIFICATIONTYPE = string.Empty,
+            //    TITLE = string.Empty,
+            //    TITLECODE = string.Empty
+            //};
+            XmlDocument soapEnvelopeXml = CreateSoapEnvelopeCreateInterviewEvaluation(obj);
+            string results = ProcessSoapXMLRequest(soapEnvelopeXml, "J_INT_EVAL_CREATE.2");
+            CreateIntEvalResponse responseObj = new CreateIntEvalResponse();
+            XmlDocument doc = new XmlDocument();
+            doc.LoadXml(results);
+            XmlNodeList nodeList = doc.GetElementsByTagName("InterviewEvaluation");
+
+            foreach (XmlNode node in nodeList)
+            {
+                responseObj.EmpId = node["EmpId"].InnerText;
+                responseObj.IsSuccessful = node["IsSuccessful"].InnerText;
+                responseObj.Message = node["Message"].InnerText;
+
+            }
+            return responseObj;            
+        }
+        private static XmlDocument CreateSoapEnvelopeCreateInterviewEvaluation(IntEvalPersonSubmitRequest Obj)
+        {
+            XmlDocument soapEnvelop = new XmlDocument();
+            string soap = "<soapenv:Envelope xmlns:soapenv='http://schemas.xmlsoap.org/soap/envelope/' xmlns:j='http://xmlns.oracle.com/Enterprise/Tools/schemas/J_INT_EVAL_SRCH.J_INT_EVAL_SRCH.V1'>" +
+                          "<soapenv:Header/>" +
+                          "<soapenv:Body>" +
+                          "<j:InterviewEvaluation xsi:schemaLocation='http://xmlns.oracle.com/Enterprise/Tools/schemas/J_INT_EVAL_SRCH.J_INT_EVAL_SRCH.V1' xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance' xmlns='http://xmlns.oracle.com/Enterprise/Tools/schemas/J_INT_EVAL_SRCH.J_INT_EVAL_SRCH.V1'>" +
+                            "<j:EmpId>" + Obj.EmpId + "</j:EmpId>" +
+                            "<j:PersonId>" + Obj.PersonId + "</j:PersonId>" +
+                            "<j:JobId>" + Obj.JobId + "</j:JobId>" +
+                            "<j:ApplicantType>" + Obj.ApplicantType + "</j:ApplicantType>" +
+                            "<j:ApplicantGrade>" + Obj.ApplicantGrade + "</j:ApplicantGrade>" +
+                            "<j:InterViewType>" + Obj.InterViewType + "</j:InterViewType>" +
+                            "<j:InterViewDate>" + Obj.InterViewDate + "</j:InterViewDate>";
+            if (Obj.Questions.Count > 0)
+                soap += "<j:Question>";
+            foreach (InterviewQuestionSubmit ques in Obj.Questions)
+            {
+                soap += "<j:QuestionID>" + ques.QuestionID + "</j:QuestionID>" +
+                            "<j:QuesScore>" + ques.QueScore + "</j:QuesScore>" +
+                            "<j:COMMENTS>" + ques.Comments + "</j:COMMENTS>";
+            }
+            if (Obj.Questions.Count > 0)
+                soap += "</j:Question>";
+            soap += "<j:OverallRtng>" + Obj.OverallRtng + "</j:OverallRtng>" +
+                    "<j:Recommendation>" + Obj.Recommendation + "</j:Recommendation>" +
+                    "<j:Reason>" + Obj.Reason + "</j:Reason>" +
+                    "<j:GeneralComment>" + Obj.GeneralComment + "</j:GeneralComment>" +
+                    "</j:InterviewEvaluation>" +
+                    "</soapenv:Body>" +
+                    "</soapenv:Envelope>";
+            soapEnvelop.LoadXml(soap);
+            return soapEnvelop;
+        }
+        #endregion
+
+        public static string ProcessSoapXMLRequest(XmlDocument soapEnvelopeXml, string action)
+        {
+            HttpWebRequest webRequest = CreateWebRequest(ConfigurationManager.AppSettings["HRSConnection"].ToString(), action);
+            using (Stream stream = webRequest.GetRequestStream())
+            {
+                soapEnvelopeXml.Save(stream);
+            }
+            IAsyncResult asyncResult = webRequest.BeginGetResponse(null, null);
+            asyncResult.AsyncWaitHandle.WaitOne();
+            string soapResult;
+            using (WebResponse webResponse = webRequest.EndGetResponse(asyncResult))
+            {
+                using (StreamReader rd = new StreamReader(webResponse.GetResponseStream()))
+                {
+                    soapResult = rd.ReadToEnd();
+                }
+            }
+            return soapResult;
+        }

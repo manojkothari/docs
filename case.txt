@@ -1,0 +1,5 @@
+ case "INTERVIEWEVALUATIONSEARCH": //17
+                        IntEvalSearchRequest inp17 = JsonConvert.DeserializeObject<IntEvalSearchRequest>(jsonBack);
+                        InterviewEvaluationSearchResponse resp17 = SearchInterviewEvaluation(inp17);
+                        resp.Response = Utility.SerializeBase64(resp17);
+                        break;

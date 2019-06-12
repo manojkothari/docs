@@ -1,0 +1,62 @@
+    [Serializable()]
+    public class CreateIntEvalResponse
+    {
+        public string EmpId { get; set; }
+        public string IsSuccessful { get; set; }
+        public string Message { get; set; }
+    }
+
+    [Serializable()]
+    public class IntEvalPersonSubmitRequest
+    {
+        public string EmpId { get; set; }
+        public string PersonId { get; set; }
+        public string JobId { get; set; }
+        public string ApplicantType { get; set; }
+        public string ApplicantGrade { get; set; }
+        public string InterViewType { get; set; }
+        public string InterViewDate { get; set; }
+        public List<InterviewQuestionSubmit> Questions { get; set; }
+        public string OverallRtng { get; set; }
+        public string Recommendation { get; set; }
+        public string Reason { get; set; }
+        public string GeneralComment { get; set; }
+    }
+
+    public class InterviewQuestionSubmit
+    {
+        public string QuestionID { get; set; }
+        public string QueScore { get; set; }
+        public string Comments { get; set; }
+    }
+
+    [Serializable()]
+    public class IntEvalSearchRequest
+    {
+        public string EmpId { get; set; }
+        public string FromDate { get; set; }
+        public string ToDate { get; set; }
+    }
+
+    [Serializable()]
+    public class InterviewPersonalDetails
+    {
+        public string PersonId { get; set; }
+        public string Name { get; set; }
+        public string InterviewDt { get; set; }
+        public string Job { get; set; }
+        public string JobOpeningId { get; set; }
+        public string ApplicantType { get; set; }
+        public string ApplicantGrade { get; set; }
+    }
+
+    [Serializable()]
+    public class InterviewEvaluationSearchResponse
+    {
+        public InterviewEvaluationSearchResponse()
+        {
+            personaldetails = new List<InterviewPersonalDetails>();
+        }
+        public string EmpId { get; set; }
+        public List<InterviewPersonalDetails> personaldetails { get; set; }
+    }
