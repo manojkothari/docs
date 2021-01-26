@@ -1,0 +1,63 @@
+<div class="content d-flex flex-column flex-column-fluid" id="kt_content">
+  <div class="subheader subheader-solid light-green">
+
+    <div class="container-fluid d-flex align-items-center justify-content-between flex-wrap flex-sm-nowrap">
+      <!--begin::Info-->
+
+      <div class="d-flex align-items-center flex-wrap mr-2">
+        <!--begin::Page Title-->
+        <h5 class="font-weight-bold mt-2 mb-2 mr-5">TOTAL P&L- SCENARIOS</h5>
+
+      </div>
+      <div class="d-flex align-items-right flex-wrap">
+        <div class="checkbox-inline">
+          <label class="checkbox checkbox-outline checkbox-default mb-0">PerCase &nbsp;&nbsp;&nbsp;
+            <input type="checkbox" name="Checkboxes15" checked="uncheck">
+            <span></span></label>
+        </div>
+
+        <div class="dropdown dropdown-inline mr-2">Channel &nbsp;
+          <mat-form-field>
+            <mat-label>ALL CHANNELS COMBINED</mat-label>
+            <mat-select>
+              <mat-option *ngFor="let item of channelList" [value]="item.id">{{item.name}}</mat-option>
+            </mat-select>
+          </mat-form-field>
+
+        </div>
+        <div class="dropdown-inline mr-2">Simulation &nbsp;
+          <mat-form-field>
+            <mat-label>--Select--</mat-label>
+            <mat-select multiple>
+              <mat-option *ngFor="let item of simulationList" [value]="item.id">{{item.name}}</mat-option>
+            </mat-select>
+          </mat-form-field>
+        </div>
+        <div>
+          <button type="button" class="btn btn-primary" (click)="getReportData()">Submit</button>
+        </div>
+      </div>
+      <!--end::Info-->
+      <!--begin::Toolbar-->
+
+    </div>
+  </div>
+</div>
+<div>
+  <table class="table table-striped table-bordered">
+    <thead class="thead-light">
+      <tr>
+        <td *ngFor="let header of headerList; let i=index">
+          {{header}}
+        </td>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let rowData of pnlData; let rptIndex = index">
+        <td *ngFor="let item of rowData; let colIndex=index">
+          {{item}}
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>

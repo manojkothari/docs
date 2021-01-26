@@ -1,0 +1,53 @@
+<mat-dialog-content class="mat-typography">
+  <div class="modal-header modal-header-yellow ">
+    <h5 class="modal-title" id="exampleModalLabel">Add New Baseline</h5>
+
+    <button mat-button mat-dialog-close>
+      <i aria-hidden="true" class="ki ki-close"></i>
+    </button>
+  </div>
+  <form [formGroup]="baseLineAddForm" (ngSubmit)="OnBaseLineAdd()">
+      <div class="row">
+        <div class="col-lg-6">
+          <label>BASELINE NAME</label>
+          <input type="hidden" formControlName="baselineId" id="baselineId"/>
+          <input type="hidden" formControlName="userId" id="userId"/>
+          <input type="hidden" formControlName="createdBy" id="createdBy"/>
+          <input type="hidden" formControlName="status" id="status"/>
+
+          <input type="text" class="form-control" formControlName="baselineName" id="baselineName" />
+        </div>
+        <div class="col-lg-6">
+          <label>BASE YEAR</label>
+          <input type="text" class="form-control" formControlName="baselineYear" id="baselineYear"/>
+        </div>
+
+      </div>
+      <div class="row">
+        <div class="col-lg-6">
+          <label>TENANT</label>
+          <select class="form-control" formControlName="tenantId" id="tenantId">            
+            <option *ngFor="let tenant of tenantList" value="{{tenant.tenantId}}">{{tenant.tenantName}}</option>            
+          </select>
+        </div>
+        <div class="col-lg-6">
+          <label>CURRENCY</label>
+          <input type="text" class="form-control" formControlName="currency" id="currency"/>          
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-lg-6">
+          <label>ACCESS</label>
+          <input type="text" class="form-control" formControlName="access" id="access"/>
+          <div class="fv-plugins-message-container"></div>
+        </div>
+        <div class="col-lg-6">
+          <label>PRECISION</label>
+          <input type="text" class="form-control" formControlName="precision" id="precision"/>
+        </div>
+      </div>
+    </form>
+    <div class="modal-footer">
+      <button type="button" mat-button mat-dialog-close class="btn btn-light-primary font-weight-bold" (click)="OnBaseLineAdd()">Save</button>      
+    </div>
+</mat-dialog-content>

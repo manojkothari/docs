@@ -1,0 +1,43 @@
+<!--begin::Header for Mobile-->
+<div id="kt_header_mobile" class="header-mobile">
+  <a href="index.html">
+    <img alt="Logo" src="assets/images/logo.png" class="logo-default max-h-30px" />
+  </a>
+  <div class="d-flex align-items-center">
+    <button class="btn p-0 burger-icon burger-icon-left" id="kt_aside_mobile_toggle">
+      <span></span>
+    </button>
+  </div>
+</div>
+<!--end::Header for Mobile-->
+
+<div class="d-flex flex-column flex-root h-100">
+  <div class="d-flex flex-row flex-column-fluid page h-100 border-red">
+
+    <!--begin::wrapper-->
+    <div class="d-flex flex-column flex-row wrapper w-100" id="kt_wrapper">
+      <div id="kt_header" class="header header-fixed">
+        <div class="container-fluid d-flex align-items-stretch justify-content-between" style="padding-left: 0;">
+          <!--begin::Top Header Menu-->
+          <app-top-left-nav-menu></app-top-left-nav-menu>
+          <app-top-right-nav-menu></app-top-right-nav-menu>
+          <!--end::Top Header Menu-->
+        </div>
+      </div>
+
+      <!--begin::Content-->
+      <router-outlet></router-outlet>
+      <!--end::Content-->
+    </div>
+    <!--begin::wrapper-->
+
+    <!--right-side tree menu-->
+    <app-right-side-tree></app-right-side-tree>
+    <!--right-side tree menu-->
+
+    <!--begin::footer -->
+    <app-footer></app-footer>
+    <!--end::footer -->
+
+  </div>
+</div>

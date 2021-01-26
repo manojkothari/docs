@@ -1,0 +1,50 @@
+<mat-dialog-content class="mat-typography">
+  <div class="modal-header modal-header-yellow ">
+    <h5 class="modal-title" id="exampleModalLabel">Add New Simulation</h5>
+
+    <button mat-button mat-dialog-close>
+      <i aria-hidden="true" class="ki ki-close"></i>
+    </button>
+  </div>
+  <br /><br />
+  <form [formGroup]="simulationForm" (ngSubmit)="OnSimulationAdd()">
+    <div class="row">
+      <div class="col-lg-12">
+        <label>SIMULATION NAME</label>
+        <input type="text" class="form-control" formControlName="simulationName" id="simulationName" />
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-lg-12">
+        <label>COPY EXISTING BASELINE/ SIMULATION</label>
+        <input type="text" class="form-control" formControlName="id" id="id" />
+      </div>
+    </div>
+    <!--<div class="row">
+      <div class="col-lg-12">
+        <mat-tree [dataSource]="dataSource" [treeControl]="treeControl">-->
+          <!-- This is the tree node template for leaf nodes -->
+          <!--<mat-tree-node *matTreeNodeDef="let node" matTreeNodePadding>-->
+            <!-- use a disabled button to provide padding for tree leaf -->
+            <!--<button mat-icon-button disabled></button>
+            {{node.name}}
+          </mat-tree-node>-->
+          <!-- This is the tree node template for expandable nodes -->
+          <!--<mat-tree-node *matTreeNodeDef="let node;when: hasChild" matTreeNodePadding>
+            <button mat-icon-button matTreeNodeToggle
+                    [attr.aria-label]="'Toggle ' + node.name">
+              <mat-icon class="mat-icon-rtl-mirror">
+                {{treeControl.isExpanded(node) ? 'expand_more' : 'chevron_right'}}
+              </mat-icon>
+            </button>
+            {{node.name}}
+          </mat-tree-node>
+        </mat-tree>
+
+      </div>
+    </div>-->
+  </form>
+  <div class="modal-footer">
+    <button type="button" mat-button mat-dialog-close class="btn btn-light-primary font-weight-bold" (click)="OnSimulationAdd()">Save</button>
+  </div>
+</mat-dialog-content>

@@ -1,0 +1,194 @@
+<!--begin::Content-->
+<div class="content d-flex flex-column flex-column-fluid" id="kt_content">
+  <div class="subheader subheader-solid blue">
+    <div class="container-fluid d-flex align-items-center justify-content-between flex-wrap flex-sm-nowrap">
+      <!--begin::Info-->
+      <div class="d-flex align-items-center flex-wrap mr-2">
+        <!--begin::Page Title-->
+        <h5 class="font-weight-bold mt-2 mb-2 mr-5">BRAND CATEGORY</h5>
+      </div>
+      <div class="d-flex align-items-right flex-wrap">
+        <!--begin::Dropdown-->
+        <div class="dropdown dropdown-inline">
+          <a href="#" class="btn btn-sm btn-fixed-height bg-white px-2 px-lg-2 mr-2" data-toggle="modal"
+            data-target="#addNewbasline">
+            <span class="svg-icon svg-icon-lg">
+              <i class="fa fa-plus-circle fa-2x" aria-hidden="true"></i>
+            </span>
+            <span class="d-md-inline">Add</span>
+          </a>
+        </div>
+      </div>
+      <!--end::Info-->
+      <!--begin::Toolbar-->
+
+    </div>
+    <a href="#" class="btn btn-black btn-icon font-weight-bold px-2" data-toggle="modal" data-target="#kt_chat_modal">
+      <span class="svg-icon svg-icon-lg">
+        <!--begin::Svg Icon | path:/metronic/theme/html/demo3/dist/assets/media/svg/icons/Communication/Group-chat.svg-->
+        <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="24px" height="24px"
+          viewBox="0 0 24 24" version="1.1">
+          <g stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+            <rect x="0" y="0" width="24" height="24"></rect>
+            <path
+              d="M16,15.6315789 L16,12 C16,10.3431458 14.6568542,9 13,9 L6.16183229,9 L6.16183229,5.52631579 C6.16183229,4.13107011 7.29290239,3 8.68814808,3 L20.4776218,3 C21.8728674,3 23.0039375,4.13107011 23.0039375,5.52631579 L23.0039375,13.1052632 L23.0206157,17.786793 C23.0215995,18.0629336 22.7985408,18.2875874 22.5224001,18.2885711 C22.3891754,18.2890457 22.2612702,18.2363324 22.1670655,18.1421277 L19.6565168,15.6315789 L16,15.6315789 Z"
+              fill="#000000"></path>
+            <path
+              d="M1.98505595,18 L1.98505595,13 C1.98505595,11.8954305 2.88048645,11 3.98505595,11 L11.9850559,11 C13.0896254,11 13.9850559,11.8954305 13.9850559,13 L13.9850559,18 C13.9850559,19.1045695 13.0896254,20 11.9850559,20 L4.10078614,20 L2.85693427,21.1905292 C2.65744295,21.3814685 2.34093638,21.3745358 2.14999706,21.1750444 C2.06092565,21.0819836 2.01120804,20.958136 2.01120804,20.8293182 L2.01120804,18.32426 C1.99400175,18.2187196 1.98505595,18.1104045 1.98505595,18 Z M6.5,14 C6.22385763,14 6,14.2238576 6,14.5 C6,14.7761424 6.22385763,15 6.5,15 L11.5,15 C11.7761424,15 12,14.7761424 12,14.5 C12,14.2238576 11.7761424,14 11.5,14 L6.5,14 Z M9.5,16 C9.22385763,16 9,16.2238576 9,16.5 C9,16.7761424 9.22385763,17 9.5,17 L11.5,17 C11.7761424,17 12,16.7761424 12,16.5 C12,16.2238576 11.7761424,16 11.5,16 L9.5,16 Z"
+              fill="#000000" opacity="0.3"></path>
+          </g>
+        </svg>
+        <!--end::Svg Icon-->
+      </span>
+    </a>
+  </div>
+
+  <!--begin::Entry-->
+  <div class="d-flex flex-column-fluid">
+    <!--begin::Container-->
+    <div class="container-fluid">
+      <div class="pt-2 pb-0 mt-n3">
+        <h6 class="text-dark">Brand Category List</h6>
+        <div class="row">
+          <div class="col-md-12 col-xs-12">
+            <table class="table table-bordered fixed-layout-default"
+              style="-webkit-box-shadow: 0px 0px 30px 0px rgba(82, 63, 105, 0.05); box-shadow: 0px 0px 30px 0px rgba(82, 63, 105, 0.05);">
+              <thead class="thead-light">
+                <tr>
+                  <th class="react-back" style="width:5%">Sr.no</th>
+                  <th class="react-back">Category</th>
+                  <th class="react-back">Abreviation</th>
+                  <th class="react-back">ISSCOM</th>
+                  <th class="react-back" style="width:10%">Edit</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let item of categoryList; let i = index">
+                  <th scope="row">{{i + 1}}</th>
+                  <td>{{item.brandName}}</td>
+                  <td>{{item.brandAbbr}}</td>
+                  <td>{{item.isScomReference}}</td>
+                  <td>
+                    <button type="button" class="btn btn-sm btn-outline-secondary btn-icon" data-toggle="modal"
+                      data-target="#exampleModalSizeLg">
+                      <i class="fa fa-pencil fa-lg" aria-hidden="true"></i>
+                    </button>
+                    <button type="button" class="btn btn-sm btn-outline-secondary btn-icon"
+                      (click)="onClickDeleteBrandCatButton(item.brandId);">
+                      <i class="fa fa-trash-o fa-lg" aria-hidden="true"></i>
+                    </button>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+      <!--end::Container-->
+    </div>
+    <!--end::Entry-->
+  </div>
+  <!--end::Content-->
+</div>
+
+
+<div class="modal fade" id="exampleModalSizeLg" tabindex="-1" aria-labelledby="exampleModalSizeLg"
+  style="display: none;" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header modal-header-yellow ">
+        <h5 class="modal-title" id="exampleModalLabel">Edit Exsiting Brand / Category</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <i class="fa fa-times" aria-hidden="true"></i>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group row fv-plugins-icon-container">
+          <div class="col-lg-6">
+            <label>BRAND CATEGORY NAME <span class="red">*</span></label>
+            <input type="text" class="form-control" />
+          </div>
+
+          <div class="col-lg-6">
+            <label>ABBREVIATION <span class="red">*</span></label>
+            <input type="text" class="form-control" />
+            <div class="fv-plugins-message-container"></div>
+          </div>
+          <div class="col-lg-6">
+            <label>ISSCOM <span class="red">*</span></label>
+            <select class="form-control" name="ISSCOM">
+              <option value="">Select Isscom</option>
+              <option value="2018">2018</option>
+              <option value="2019">2019</option>
+              <option value="2020">2020</option>
+              <option value="2021">2021</option>
+              <option value="2022">2022</option>
+              <option value="2023">2023</option>
+              <option value="2024">2024</option>
+            </select>
+            <div class="fv-plugins-message-container"></div>
+          </div>
+        </div>
+
+      </div>
+      <div class="modal-footer">
+
+        <button type="button" class="btn btn-light-primary font-weight-bold" data-dismiss="modal">Update</button>
+
+      </div>
+    </div>
+  </div>
+</div>
+<!-----POp Up Modal--------------------------------->
+<!-----Add New CATEGORY--------------------------------->
+
+<div class="modal fade" id="addNewbasline" tabindex="-1" aria-labelledby="addNewbasline" style="display: none;"
+  aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header modal-header-yellow ">
+        <h5 class="modal-title" id="exampleModalLabel">Add New Brand / Category</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <i class="fa fa-times" aria-hidden="true"></i>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group row fv-plugins-icon-container">
+          <div class="col-lg-6">
+            <label>BRAND CATEGORY NAME <span class="red">*</span></label>
+            <input type="text" class="form-control" />
+          </div>
+
+
+        </div>
+        <div class="form-group row fv-plugins-icon-container">
+          <div class="col-lg-6">
+            <label>ABBREVIATION <span class="red">*</span></label>
+            <input type="text" class="form-control" />
+            <div class="fv-plugins-message-container"></div>
+          </div>
+          <div class="col-lg-6">
+            <label>ISSCOM <span class="red">*</span></label>
+            <select class="form-control" name="ISSCOM">
+              <option value="">Select Isscom</option>
+              <option value="2018">2018</option>
+              <option value="2019">2019</option>
+              <option value="2020">2020</option>
+              <option value="2021">2021</option>
+              <option value="2022">2022</option>
+              <option value="2023">2023</option>
+              <option value="2024">2024</option>
+            </select>
+            <div class="fv-plugins-message-container"></div>
+          </div>
+        </div>
+
+      </div>
+      <div class="modal-footer">
+
+        <button type="button" class="btn btn-light-primary font-weight-bold" data-dismiss="modal">Create</button>
+
+      </div>
+    </div>
+  </div>
+</div>

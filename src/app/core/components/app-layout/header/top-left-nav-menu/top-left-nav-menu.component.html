@@ -1,0 +1,65 @@
+<div class="header-menu-wrapper header-menu-wrapper-left" id="kt_header_menu_wrapper">
+    <!--begin::Header Menu-->
+    <div id="kt_header_menu" class="header-menu header-menu-mobile header-menu-layout-default">
+        <div class="aside-brand categ-logo d-flex flex-column align-items-center flex-column-auto py-5 px-5 py-lg-7">
+            <!--begin::Logo-->
+            <a [routerLink]="['/']">
+                <img alt="Logo" src="assets/images/logo.png" class="max-h-30px" />
+            </a>
+            <!--end::Logo-->
+        </div>
+
+        <!--begin::Header top left Navbar-->
+        <div class="d-flex align-items-baseline flex-wrap">
+            <ul class="menu-nav top-nav-menu h-100">
+                <li class="nav-item">
+                    <a [routerLink]="['/setup/index']" [routerLinkActive]="['brown']" #rlaSetup="routerLinkActive"
+                        [routerLinkActiveOptions]="{exact: true}"
+                        class="nav-link btn btn-icon btn-clean h-100 btn-lg px-5">
+                        <img
+                            [src]="rlaSetup.isActive ? 'assets/images/icon/Setup.svg' : 'assets/images/icon/Setup-grey.svg'">
+                        <h5>SETUP</h5>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a [routerLink]="['/rgm/index']" [routerLinkActive]="['blue']" #rlaRgm="routerLinkActive"
+                        class="nav-link btn btn-icon btn-clean h-100 btn-lg px-5">
+                        <img [src]="rlaRgm.isActive ? 'assets/images/icon/RGM.svg' : 'assets/images/icon/RGM-grey.svg'">
+                        <h5>RGM</h5>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a [routerLink]="['/seg/index']" [routerLinkActive]="['green']" #rlaSeg="routerLinkActive"
+                        class="nav-link btn btn-icon btn-clean h-100 btn-lg px-5">
+                        <img [src]="rlaSeg.isActive ? 'assets/images/icon/SEG.svg' : 'assets/images/icon/SEG-grey.svg'">
+                        <h5>SEG</h5>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a [routerLink]="['/red/index']" [routerLinkActive]="['red-red']" #rlaRed="routerLinkActive"
+                        class="nav-link btn btn-icon btn-clean h-100 btn-lg px-5">
+                        <img [src]="rlaRed.isActive ? 'assets/images/icon/RED.svg' : 'assets/images/icon/RED-grey.svg'">
+                        <h5>RED</h5>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a [routerLink]="['/rtm/index']" [routerLinkActive]="['purple']" #rlaRtm="routerLinkActive"
+                        class="nav-link btn btn-icon btn-clean h-100 btn-lg px-5">
+                        <img [src]="rlaRtm.isActive ? 'assets/images/icon/RTM.svg' : 'assets/images/icon/RTM-grey.svg'">
+                        <h5>RTM</h5>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a [routerLink]="['/reports/index']" [routerLinkActive]="['light-green']"
+                        #rlaReports="routerLinkActive" class="nav-link btn btn-icon btn-clean h-100 btn-lg px-5">
+                        <img
+                            [src]="rlaReports.isActive ? 'assets/images/icon/Reports.svg' : 'assets/images/icon/Reports-grey.svg'">
+                        <h5>REPORTS</h5>
+                    </a>
+                </li>
+            </ul>
+        </div>
+        <!--end::Header top left Navbar-->
+    </div>
+    <!--end::Header Menu-->
+</div>

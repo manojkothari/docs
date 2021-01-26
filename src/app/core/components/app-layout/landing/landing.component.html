@@ -1,0 +1,180 @@
+<!--begin::Header Mobile-->
+<div id="kt_header_mobile" class="header-mobile">
+  <a [routerLink]="['/']">
+    <img alt="Logo" src="assets/images/logo.png" class="logo-default max-h-30px" />
+  </a>
+  <div class="d-flex align-items-center">
+    <button class="btn p-0 burger-icon burger-icon-left">
+      <span></span>
+    </button>
+  </div>
+</div>
+<!--end::Header Mobile-->
+
+<!--begin::Page-->
+<div class="d-flex flex-column flex-root">
+  <div class="d-flex flex-row flex-column-fluid">
+    <div class="d-flex flex-column flex-row-fluid">
+
+      <div id="kt_header" class="header">
+        <div class="container-fluid d-flex align-items-stretch justify-content-between">
+          <div class="header-menu-wrapper header-menu-wrapper-left">
+            <div id="kt_header_menu" class="header-menu header-menu-mobile header-menu-layout-default">
+              <ul class="menu-nav">
+              </ul>
+            </div>
+          </div>
+          <!--begin::right Topbar-->
+          <app-top-right-nav-menu></app-top-right-nav-menu>
+          <!--end::right Topbar-->
+        </div>
+      </div>
+
+      <div class="content d-flex flex-column flex-column-fluid" style="padding:0">
+        <div class="d-flex flex-column-fluid">
+          <div class="container-fluid">
+
+            <!--begin::body content -->
+            <div class="row">
+              <div class="container-fluid">
+
+                <h3>
+                  <img src="assets/images/champ-page-logo.png" />
+                </h3>
+                <h1 style="color:#fff; font-weight: 600;"><span class="red">CHA</span>NNEL / CUSTOMER <span
+                    class="red">M</span>ARKETING <span class="red">P</span>LANNING <span class="red">S</span>YSTEM</h1>
+                <p class="main-p">Integrated channel / customer profitability system to support the development of
+                  channel business plans addressing - Brand, Price & Packaging by Channel; Operational Marketing
+                  Strategies; Sales / Merchandising, Delivery & Equipment Services; Channel Forecasting; Channel
+                  Operating Costs and integrates them into a view of profitability.</p><br />
+
+                <div class="row">
+                  <div class="col-xl col-md">
+                    <div class="card card-custom card-stretch gutter-b">
+                      <div class="card-body d-flex flex-column text-center py-0 px-0">
+                        <a [routerLink]="['/rgm/index']">
+                          <div class="flex-grow-1">
+                            <div class="d-block align-items-center pr-2 mb-2 high-line">
+                              <div class="w-20 blue">
+                                <img src="assets/images/icon/RGM.svg" class="h-50 w-100 align-self-center p-5" alt="">
+                              </div>
+                            </div>
+                            <h1 class="text-dark font-weight-bolder text-hover-primary font-size-h1">RGM</h1>
+                            <p class="text-dark-50 font-weight-normal font-size-h4 mt-4">
+                              REVENUE GROWTH MANAGEMENT
+                            </p>
+                          </div>
+                          <div class="symbol symbol-45 symbol-light font-size-h1">
+                            <i class="la la-arrow-right arrow-blue"></i>
+                          </div>
+                        </a>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="col-xl col-md">
+                    <div class="card card-custom card-stretch gutter-b">
+                      <div class="card-body d-flex flex-column text-center py-0 px-0">
+                        <a [routerLink]="['/seg/index']">
+                          <div class="flex-grow-1">
+                            <div class="d-block align-items-center pr-2 mb-2 high-line">
+                              <div class="w-20 green">
+                                <img src="assets/images/icon/SEG.svg" class="h-50 w-100 align-self-center p-5" alt="">
+                              </div>
+                            </div>
+                            <h1 class="text-dark font-weight-bolder text-hover-primary font-size-h1">SEG</h1>
+                            <p class="text-dark-50 font-weight-normal font-size-h4 mt-4">
+                              SEGMENTATION
+                            </p>
+                          </div>
+                          <h1 class="symbol symbol-45 symbol-light font-size-h1">
+                            <i class="la la-arrow-right arrow-green"></i>
+                          </h1>
+                        </a>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="col-xl col-md">
+                    <div class="card card-custom card-stretch gutter-b">
+                      <div class="card-body d-flex flex-column py-0 px-0 text-center">
+                        <a [routerLink]="['/red/index']">
+                          <div class="flex-grow-1">
+                            <div class="d-block align-items-center pr-2 mb-2 high-line">
+                              <div class="w-20 red-red">
+                                <img src="assets/images/icon/RED.svg" class="h-50 w-100 align-self-center p-5" alt="">
+                              </div>
+                            </div>
+                            <h1 class="text-dark font-weight-bolder text-hover-primary font-size-h1">RED</h1>
+                            <p class="text-dark-50 font-weight-normal font-size-h4 mt-4">
+                              RIGHT EXECUTION DAILY
+                            </p>
+                          </div>
+                          <h1 class="symbol symbol-45 symbol-light font-size-h1">
+                            <i class="la la-arrow-right arrow-red"></i>
+                          </h1>
+                        </a>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="col-xl col-md">
+                    <div class="card card-custom card-stretch gutter-b">
+                      <div class="card-body d-flex flex-column py-0 px-0 text-center">
+                        <a [routerLink]="['/rtm/index']">
+                          <div class="flex-grow-1">
+                            <div class="d-block align-items-center pr-2 mb-2 high-line">
+                              <div class="w-20 purple">
+                                <img src="assets/images/icon/RTM.svg" class="h-50 w-100 align-self-center p-5" alt="">
+                              </div>
+                            </div>
+                            <h1 class="text-dark font-weight-bolder text-hover-primary font-size-h1">RTM</h1>
+                            <p class="text-dark-50 font-weight-normal font-size-h4 mt-4">
+                              ROUTE TO MARKET
+                            </p>
+                          </div>
+                          <h1 class="symbol symbol-45 symbol-light font-size-h1">
+                            <i class="la la-arrow-right arrow-purple"></i>
+                          </h1>
+                        </a>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <!--end::body content -->
+
+            <!--right-side tree menu-->
+            <app-right-side-tree></app-right-side-tree>
+            <!--right-side menu-->
+          </div>
+        </div>
+      </div>
+
+      <!--begin::footer -->
+      <app-footer></app-footer>
+      <!--end::footer -->
+    </div>
+  </div>
+</div>
+<!--end::Page-->
+
+<!--begin::Scrolltop-->
+<div id="kt_scrolltop" class="scrolltop">
+  <span class="svg-icon">
+    <!--begin::Svg Icon | path:assets/media/svg/icons/Navigation/Up-2.svg-->
+    <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="24px" height="24px"
+      viewBox="0 0 24 24" version="1.1">
+      <g stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <polygon points="0 0 24 0 24 24 0 24" />
+        <rect fill="#000000" opacity="0.3" x="11" y="10" width="2" height="10" rx="1" />
+        <path
+          d="M6.70710678,12.7071068 C6.31658249,13.0976311 5.68341751,13.0976311 5.29289322,12.7071068 C4.90236893,12.3165825 4.90236893,11.6834175 5.29289322,11.2928932 L11.2928932,5.29289322 C11.6714722,4.91431428 12.2810586,4.90106866 12.6757246,5.26284586 L18.6757246,10.7628459 C19.0828436,11.1360383 19.1103465,11.7686056 18.7371541,12.1757246 C18.3639617,12.5828436 17.7313944,12.6103465 17.3242754,12.2371541 L12.0300757,7.38413782 L6.70710678,12.7071068 Z"
+          fill="#000000" fill-rule="nonzero" />
+      </g>
+    </svg>
+    <!--end::Svg Icon-->
+  </span>
+</div>
+<!--end::Scrolltop-->
